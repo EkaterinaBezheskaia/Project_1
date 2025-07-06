@@ -16,12 +16,15 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees")
-    public EmployeeEntity addEmployee(@RequestBody EmployeeEntity employee) {
+    public EmployeeEntity addEmployee(
+            @RequestBody EmployeeEntity employee) {
         return employeeService.addEmployee(employee);
     }
 
     @PatchMapping("/employees/{id}")
-    public EmployeeEntity updateEmployee(@PathVariable int id, @RequestBody EmployeeEntity employee) {
+    public EmployeeEntity updateEmployee(
+            @PathVariable int id,
+            @RequestBody EmployeeEntity employee) {
         return employeeService.updateEmployee(employee);
     }
 

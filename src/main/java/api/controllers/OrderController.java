@@ -17,12 +17,15 @@ public class OrderController {
     }
 
     @PostMapping("/orders")
-    public OrderEntity createOrder(@RequestBody OrderEntity order) {
+    public OrderEntity createOrder(
+            @RequestBody OrderEntity order) {
         return orderService.createOrder(order);
     }
 
     @PatchMapping("/orders/{id}")
-    public OrderEntity updateOrder(@PathVariable int id, @RequestBody OrderEntity order) {
+    public OrderEntity updateOrder(
+            @PathVariable int id,
+            @RequestBody OrderEntity order) {
         return orderService.updateOrder(order);
     }
 
@@ -32,7 +35,8 @@ public class OrderController {
     }
 
     @DeleteMapping("/orders/{id}")
-    public void deleteOrder(@PathVariable int id) {
+    public void deleteOrder(
+            @PathVariable int id) {
         orderService.deleteOrder(id);
     }
 }

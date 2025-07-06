@@ -29,7 +29,7 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public void deleteEmployee(int id) {
-        employeeRepository.deleteById(id);
+    public void deleteEmployee(int employeeId) {
+        employeeRepository.deleteById(employeeId);
     }
 }
