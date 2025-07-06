@@ -1,32 +1,41 @@
 package store.services;
 
+import api.dto.ClientDTO;
+import api.mappers.ClientMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.entities.ClientEntity;
 import store.repositories.ClientRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ClientService {
 
     private final ClientRepository clientRepository;
+    private final ClientMapper clientMapper;
 
-    public ClientService(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
+    public ClientDTO createClient(ClientDTO client) {
+        ClientEntity clientEntity = clientMapper.toClientEntity(client);
+        ClientEntity savedClientEntity = clientRepository.save(clientEntity);
+        return clientMapper.toClientDTO(savedClientEntity);
     }
 
-    public ClientEntity createClient(ClientEntity client) {
-        return clientRepository.save(client);
+    public ClientDTO updateClient(ClientDTO client) {
+        ClientEntity clientEntity = clientMapper.toClientEntity(client);
+        ClientEntity savedClientEntity = clientRepository.save(clientEntity);
+        return clientMapper.toClientDTO(savedClientEntity);
     }
 
-    public ClientEntity updateClient(ClientEntity client) {
-        return clientRepository.save(client);
-    }
-
-    public List<ClientEntity> getAllClients() {
-        return clientRepository.findAll();
+    public List<ClientDTO> getAllClients() {
+        List<ClientDTO> clients = new ArrayList<>();
+        clientRepository.findAll().forEach(
+                clientEntity -> clients.add(clientMapper.toClientDTO(clientEntity)));
+        return clients;
     }
 
     public void deleteClient(int id) {

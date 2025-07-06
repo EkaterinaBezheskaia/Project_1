@@ -1,5 +1,6 @@
 package api.controllers;
 
+import api.dto.OrderDTO;
 import jakarta.persistence.criteria.Order;
 import org.springframework.web.bind.annotation.*;
 import store.entities.OrderEntity;
@@ -17,20 +18,20 @@ public class OrderController {
     }
 
     @PostMapping("/orders")
-    public OrderEntity createOrder(
-            @RequestBody OrderEntity order) {
+    public OrderDTO createOrder(
+            @RequestBody OrderDTO order) {
         return orderService.createOrder(order);
     }
 
     @PatchMapping("/orders/{id}")
-    public OrderEntity updateOrder(
+    public OrderDTO updateOrder(
             @PathVariable int id,
-            @RequestBody OrderEntity order) {
+            @RequestBody OrderDTO order) {
         return orderService.updateOrder(order);
     }
 
     @GetMapping("/orders")
-    public List<OrderEntity> getAllOrders() {
+    public List<OrderDTO> getAllOrders() {
         return orderService.getAllOrders();
     }
 

@@ -1,5 +1,6 @@
 package api.controllers;
 
+import api.dto.EmployeeDTO;
 import org.springframework.web.bind.annotation.*;
 import store.entities.EmployeeEntity;
 import store.services.EmployeeService;
@@ -16,20 +17,20 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees")
-    public EmployeeEntity addEmployee(
-            @RequestBody EmployeeEntity employee) {
+    public EmployeeDTO addEmployee(
+            @RequestBody EmployeeDTO employee) {
         return employeeService.addEmployee(employee);
     }
 
     @PatchMapping("/employees/{id}")
-    public EmployeeEntity updateEmployee(
+    public EmployeeDTO updateEmployee(
             @PathVariable int id,
-            @RequestBody EmployeeEntity employee) {
+            @RequestBody EmployeeDTO employee) {
         return employeeService.updateEmployee(employee);
     }
 
     @GetMapping("/employees")
-    public List<EmployeeEntity> getAllEmployees() {
+    public List<EmployeeDTO> getAllEmployees() {
         return employeeService.getAllEmployees();
     }
 

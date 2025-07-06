@@ -1,5 +1,6 @@
 package api.controllers;
 
+import api.dto.ProductDTO;
 import org.springframework.web.bind.annotation.*;
 import store.entities.ProductEntity;
 import store.services.ProductService;
@@ -16,20 +17,20 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public ProductEntity addProduct(
-            @RequestBody ProductEntity product) {
+    public ProductDTO addProduct(
+            @RequestBody ProductDTO product) {
         return productService.addProduct(product);
     }
 
     @PatchMapping("/products/{id}")
-    public ProductEntity updateProduct(
+    public ProductDTO updateProduct(
             @PathVariable int id,
-            @RequestBody ProductEntity product) {
+            @RequestBody ProductDTO product) {
         return productService.updateProduct(product);
     }
 
     @GetMapping("/products/all")
-    public List<ProductEntity> getAllProducts() {
+    public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
 

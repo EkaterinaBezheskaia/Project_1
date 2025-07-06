@@ -1,5 +1,6 @@
 package api.controllers;
 
+import api.dto.ClientDTO;
 import ch.qos.logback.core.net.server.Client;
 import org.springframework.web.bind.annotation.*;
 import store.entities.ClientEntity;
@@ -17,20 +18,20 @@ public class ClientController {
     }
 
     @PostMapping("/clients")
-    public ClientEntity createClient(
-            @RequestBody ClientEntity client) {
+    public ClientDTO createClient(
+            @RequestBody ClientDTO client) {
         return clientService.createClient(client);
     }
 
     @PatchMapping("/clients/{id}")
-    public ClientEntity updateClient(
-            @RequestBody ClientEntity client,
+    public ClientDTO updateClient(
+            @RequestBody ClientDTO client,
             @PathVariable int id) {
         return clientService.updateClient(client);
     }
 
     @GetMapping("/clients")
-    public List<ClientEntity> getAllClients() {
+    public List<ClientDTO> getAllClients() {
         return clientService.getAllClients();
     }
 
