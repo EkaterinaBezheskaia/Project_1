@@ -2,8 +2,10 @@ package api.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import store.entities.Status;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder(builderMethodName = "fileDtoBuilder")
@@ -13,5 +15,7 @@ import java.time.Instant;
 public class OrderDTO {
     long id;
     Instant createdAt;
-    String status;
+    Status status;
+    List<ProductDTO> products;
+    ClientDTO client;
 }

@@ -1,9 +1,7 @@
 package api.controllers;
 
 import api.dto.OrderDTO;
-import jakarta.persistence.criteria.Order;
 import org.springframework.web.bind.annotation.*;
-import store.entities.OrderEntity;
 import store.services.OrderService;
 
 import java.util.List;

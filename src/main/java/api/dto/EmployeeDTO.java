@@ -2,6 +2,7 @@ package api.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import store.entities.Position;
 
 @Data
 @Builder(builderMethodName = "fileDtoBuilder")
@@ -14,5 +15,5 @@ public class EmployeeDTO {
     String surname;
     String emailAddress;
     String password;
-    String position;
+    Position position;
 }

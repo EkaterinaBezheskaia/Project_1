@@ -16,23 +16,25 @@ public class EmployeeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "0_id")
+    @Column(name = "employees_id", nullable = false)
     private long id;
 
-    @Column(name = "1_name")
+    @Column(name = "employees_name", nullable = false)
     private String name;
 
-    @Column(name = "2_surname")
+    @Column(name = "employees_surname", nullable = false)
     private String surname;
 
-    @Column(name = "3_email_address", unique = true)
+    @Column(name = "employees_email_address", unique = true, nullable = false)
     private String emailAddress;
 
-    @Column(name = "password")
+    @Column(name = "employees_password", nullable = false)
     @Length(min = 6)
     private String password;
 
-    @Column(name = "position")
-    private String position;
+    @Column(name = "employees_position", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Position position;
 
 }
+

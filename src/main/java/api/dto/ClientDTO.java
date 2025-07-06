@@ -3,6 +3,8 @@ package api.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @Builder(builderMethodName = "fileDtoBuilder")
 @AllArgsConstructor
@@ -14,4 +16,5 @@ public class ClientDTO {
     String surname;
     String emailAddress;
     String phoneNumber;
+    List<OrderDTO> orders;
 }
