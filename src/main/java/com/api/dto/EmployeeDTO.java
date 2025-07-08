@@ -5,7 +5,7 @@ import lombok.experimental.FieldDefaults;
 import com.store.entities.Position;
 
 @Data
-@Builder(builderMethodName = "fileDtoBuilder")
+@Builder(builderMethodName = "employeeDtoBuilder")
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)

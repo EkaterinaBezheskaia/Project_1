@@ -4,7 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder(builderMethodName = "fileDtoBuilder")
+@Builder(builderMethodName = "productDtoBuilder")
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
