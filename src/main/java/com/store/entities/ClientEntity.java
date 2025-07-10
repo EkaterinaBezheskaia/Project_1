@@ -2,7 +2,6 @@ package com.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,9 +32,6 @@ public class ClientEntity {
     @Column(name = "clients_phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
-    @Column(name = "clients_orders")
-    @OneToMany(mappedBy = "orders_id", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "clients_orders", referencedColumnName = "client")
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderEntity> orders = new ArrayList<>();
-
 }

@@ -25,5 +25,4 @@ public class ProductEntity {
 
     @Column(name = "products_price", nullable = false)
     private long price;
-
 }

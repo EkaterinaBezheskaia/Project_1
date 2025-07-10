@@ -2,7 +2,6 @@ package com.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -24,13 +23,18 @@ public class OrderEntity {
     Instant createdAt = Instant.now();
 
     @Column(name = "orders_status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "orders_products")
-    @ManyToMany(mappedBy = "products_id", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany
+    @JoinTable(
+            name = "order_products",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
     private List<ProductEntity> products;
 
-    @JoinColumn(name = "client", referencedColumnName = "clients_orders", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
     private ClientEntity client;
 }
