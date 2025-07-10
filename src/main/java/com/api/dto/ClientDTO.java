@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ClientDTO {
-    long id;
+    int id;
     String name;
     String surname;
     String emailAddress;

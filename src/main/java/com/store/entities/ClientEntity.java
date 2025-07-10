@@ -1,6 +1,7 @@
 package com.store.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class ClientEntity {
     private String surname;
 
     @Column(name = "clients_email_address", unique = true, nullable = false)
+    @Email
     private String emailAddress;
 
     @Column(name = "clients_phone_number", unique = true, nullable = false)
