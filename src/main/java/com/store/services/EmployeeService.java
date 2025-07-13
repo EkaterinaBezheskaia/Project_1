@@ -2,6 +2,7 @@ package com.store.services;
 
 import com.api.dto.EmployeeDTO;
 import com.api.mappers.EmployeeMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import com.store.repositories.EmployeeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -31,6 +33,13 @@ public class EmployeeService {
         return employeeMapper.toEmployeeDTO(savedEmployeeEntity);
     }
 
+    public EmployeeDTO getEmployeeById(int id) {
+        EmployeeEntity employeeEntity = employeeRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Сотрудник не найден"));
+        return employeeMapper.toEmployeeDTO(employeeEntity);
+    }
+
     public List<EmployeeDTO> getAllEmployees() {
         List<EmployeeDTO> employees = new ArrayList<>();
         employeeRepository.findAll().forEach(
@@ -41,4 +50,5 @@ public class EmployeeService {
     public void deleteEmployee(int employeeId) {
         employeeRepository.deleteById(employeeId);
     }
+
 }
