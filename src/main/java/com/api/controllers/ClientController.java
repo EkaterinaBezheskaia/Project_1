@@ -20,25 +20,25 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    @PostMapping("/clients")
+    @PostMapping("/clients/create")
     public ClientDTO createClient(
             @RequestBody ClientDTO client) throws IllegalArgumentException {
         return clientService.createClient(client);
     }
 
-    @PatchMapping("/clients/{id}")
+    @PatchMapping("/clients/update/{id}")
     public ClientDTO updateClient(
             @RequestBody Map<String, Object> updates,
             @PathVariable int id) {
         return clientService.updateClient(id, updates);
     }
 
-    @GetMapping("/clients")
+    @GetMapping("/clients/get_all")
     public Page<ClientDTO> getClients(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") @Pattern(regexp = "id|name|surname|emailAddress|phoneNumber") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "id") @Pattern(regexp = "id|name|surname|emailAddress|phoneNumber") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String direction,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String surname,
             @RequestParam(required = false) String email,
@@ -55,7 +55,7 @@ public class ClientController {
         return clientService.getAllClients(name, surname, email, phone, hasOrders, pageable);
     }
 
-    @DeleteMapping("/clients/{id}")
+    @DeleteMapping("/clients/delete/{id}")
     public void deleteClient(
             @PathVariable int id) {
         clientService.deleteClient(id);
