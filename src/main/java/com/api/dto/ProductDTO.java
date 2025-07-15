@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductDTO {
-    long id;
+    int id;
     String name;
     String description;
-    long price;
+    Long price;
 }
