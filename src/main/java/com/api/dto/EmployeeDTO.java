@@ -10,7 +10,7 @@ import com.store.entities.Position;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeDTO {
-    long id;
+    int id;
     String name;
     String surname;
     String emailAddress;

@@ -7,6 +7,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.ClientEntity;
 import com.store.repositories.ClientRepository;
 import org.springframework.util.StringUtils;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +30,9 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
+    private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
 
     public ClientDTO createClient(ClientDTO client) throws IllegalArgumentException {
-
-        if (clientRepository.existsById(client.getId())) {
-            throw new IllegalArgumentException("Клиент уже существует!");
-        }
 
         if (client.getName() == null || client.getName().isBlank()) {
             throw new IllegalArgumentException("Имя обязательно");
@@ -54,7 +54,7 @@ public class ClientService {
             throw new IllegalArgumentException("Телефон уже используется");
         }
 
-        if (!client.getEmailAddress().matches("^[\\\\w!#$%&'*+/=?`{|}~^-]+(?:\\\\.[\\\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\\\.)+[a-zA-Z]{2,6}$")) {
+        if (!EMAIL_VALIDATOR.isValid(client.getEmailAddress())) {
             throw new IllegalArgumentException("Некорректный формат email");
         }
         if (!client.getPhoneNumber().matches("^[0-9]{10}$")) {
@@ -65,40 +65,56 @@ public class ClientService {
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
-    public ClientDTO updateClient(int id, Map<String, Object> updates) {
+    public ClientDTO updateClient(int id, Map<String, String> updates) {
 
         ClientEntity clientEntity = clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Клиент не найден"));
 
         updates.forEach((key, value) -> {
             switch (key) {
-                case "name" -> clientEntity.setName((String) value);
-                case "surname" -> clientEntity.setSurname((String) value);
+                case "name" -> {
+                    if (value == null) {
+                        throw new IllegalArgumentException("Имя не может быть пустым");
+                    }
+                    clientEntity.setName(value);
+                }
+                case "surname" -> {
+                    if (value == null) {
+                        throw new IllegalArgumentException("Фамилия не может быть пустой");
+                    }
+                    clientEntity.setSurname(value);
+                }
                 case "emailAddress" -> {
-                    if (!clientEntity.getEmailAddress().matches("^[\\\\w!#$%&'*+/=?`{|}~^-]+(?:\\\\.[\\\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\\\.)+[a-zA-Z]{2,6}$")) {
+                    if (value == null) {
+                        throw new IllegalArgumentException("Email не может быть пустым");
+                    }
+                    if (!EMAIL_VALIDATOR.isValid(value)) {
                         throw new IllegalArgumentException("Некорректный формат email");
                     }
-                    if (clientRepository.existsByEmailAddress((String) value)) {
+                    if (clientRepository.existsByEmailAddress(value)) {
                         throw new IllegalArgumentException("Email уже существует");
                     }
-                    clientEntity.setEmailAddress((String) value);
+                    clientEntity.setEmailAddress(value);
                 }
                 case "phoneNumber" -> {
-                    if (!clientEntity.getPhoneNumber().matches("^[0-9]{10}$")) {
+                    if (value == null) {
+                        throw new IllegalArgumentException("Номер телефона не может быть пустым");
+                    }
+                    if (!value.matches("^[0-9]{10}$")) {
                         throw new IllegalArgumentException("Некорректный формат телефонного номера");
                     }
-                    if (clientRepository.existsByPhoneNumber((String) value)) {
+                    if (clientRepository.existsByPhoneNumber(value)) {
                         throw new IllegalArgumentException("Номер телефона уже существует");
                     }
-                    clientEntity.setPhoneNumber((String) value);
+                    clientEntity.setPhoneNumber(value);
                 }
-                default -> throw new IllegalArgumentException("Нет параметров для замены");
             }
         });
 
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
+    @Transactional(readOnly = true)
     public Page<ClientDTO> getAllClients(String name, String surname, String email, String phone, Boolean hasOrders, Pageable pageable) {
 
         Specification<ClientEntity> spec = (root, query, cb) -> {
@@ -115,10 +131,14 @@ public class ClientService {
                         : cb.isEmpty(root.get("orders")));
             }
 
-            return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+            return predicates.isEmpty()
+                    ? null
+                    : cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        return clientRepository.findAll(spec, pageable).map(clientMapper::toClientDTO);
+        return clientRepository
+                .findAll(spec, pageable)
+                .map(clientMapper::toClientDTO);
     }
 
     private void addTextPredicate(List<Predicate> predicates, CriteriaBuilder cb, Root<ClientEntity> root, String field, String value) {
@@ -128,6 +148,9 @@ public class ClientService {
     }
 
     public void deleteClient(int id) {
+        if (!clientRepository.existsById(id)) {
+            throw new EmptyResultDataAccessException("Нет клиента с id: " + id, 1);
+        }
         clientRepository.deleteById(id);
     }
 }
