@@ -17,7 +17,7 @@ public class OrderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orders_id", nullable = false)
-    private long id;
+    private int id;
 
     @Column(name = "orders_creationDate", nullable = false)
     Instant createdAt = Instant.now();

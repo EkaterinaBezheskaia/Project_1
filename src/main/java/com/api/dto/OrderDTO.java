@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDTO {
-    long id;
+    int id;
     Instant createdAt;
     Status status;
     List<ProductDTO> products = new ArrayList<>();

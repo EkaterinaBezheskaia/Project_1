@@ -22,7 +22,7 @@ public class ClientController {
 
     @PostMapping("/clients/create")
     public ClientDTO createClient(
-            @RequestBody ClientDTO client) throws IllegalArgumentException {
+            @RequestBody ClientDTO client) {
         return clientService.createClient(client);
     }
 

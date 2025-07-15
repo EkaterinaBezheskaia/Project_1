@@ -32,7 +32,7 @@ public class ClientService {
     private final ClientMapper clientMapper;
     private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
 
-    public ClientDTO createClient(ClientDTO client) throws IllegalArgumentException {
+    public ClientDTO createClient(ClientDTO client) {
 
         if (client.getName() == null || client.getName().isBlank()) {
             throw new IllegalArgumentException("Имя обязательно");
