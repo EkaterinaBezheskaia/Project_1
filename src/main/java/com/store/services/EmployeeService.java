@@ -2,9 +2,7 @@ package com.store.services;
 
 import com.api.dto.EmployeeDTO;
 import com.api.mappers.EmployeeMapper;
-import com.store.entities.ClientEntity;
 import com.store.entities.Position;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
@@ -35,7 +33,7 @@ public class EmployeeService {
             EnumSet.of(Position.ADMINISTRATOR, Position.MANAGER);
 
     public EmployeeDTO addEmployee(EmployeeDTO employee) {
-        if (employeeRepository.findByNameSurname(employee.getName(), employee.getSurname())) {
+        if (employeeRepository.findByNameAndSurname(employee.getName(), employee.getSurname())) {
             throw new IllegalArgumentException("Работник с таким именем и фамилией уже существует");
         }
 
@@ -75,7 +73,7 @@ public class EmployeeService {
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Работник не найден"));
 
-        if (employeeRepository.findByNameSurname(employeeEntity.getName(), employeeEntity.getSurname())) {
+        if (employeeRepository.findByNameAndSurname(employeeEntity.getName(), employeeEntity.getSurname())) {
             throw new IllegalArgumentException("Работник с таким ФИО и должностью уже существует");
         }
 

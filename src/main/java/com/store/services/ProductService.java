@@ -2,7 +2,6 @@ package com.store.services;
 
 import com.api.dto.ProductDTO;
 import com.api.mappers.ProductMapper;
-import com.store.entities.EmployeeEntity;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -43,7 +42,7 @@ public class ProductService {
             throw new IllegalArgumentException("Цена обязательна");
         }
 
-        if (productRepository.existByName(product.getName())) {
+        if (productRepository.existsByName(product.getName())) {
             throw new EntityExistsException("Название должно быть уникальным");
         }
 
@@ -77,7 +76,7 @@ public class ProductService {
 
             addTextPredicate(predicates, criteriaBuilder, root, "name", name);
             addTextPredicate(predicates, criteriaBuilder, root, "description", description);
-            if (price != null || price >= 0) {
+            if (price != null && price >= 0L) {
                 predicates.add(criteriaBuilder.equal(root.get("price"), price));
             }
 
