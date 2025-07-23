@@ -23,6 +23,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/orders/create")
     public OrderDTO createOrder(
             @RequestBody @Valid OrderDTO order) {
@@ -56,6 +57,7 @@ public class OrderController {
         return orderService.getAllOrders(createdAt, status, pageable);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/orders/delete/{id}")
     public void deleteOrder(
             @PathVariable("id") int id) {

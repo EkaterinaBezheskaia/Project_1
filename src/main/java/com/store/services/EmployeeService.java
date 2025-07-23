@@ -50,6 +50,12 @@ public class EmployeeService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль обязателен");
         }
 
+        if (!employee.getName().matches("[A-Za-zА-Яа-я]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
+        }
+        if (!employee.getSurname().matches("[A-Za-zА-Яа-я]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
+        }
         if(!EMAIL_VALIDATOR_2.isValid(employee.getEmailAddress())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
         }

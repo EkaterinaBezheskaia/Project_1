@@ -23,6 +23,7 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/employees/create")
     public EmployeeDTO addEmployee(
             @RequestBody @Valid EmployeeDTO employee) {
@@ -63,6 +64,7 @@ public class EmployeeController {
         return employeeService.getAllEmployees(name, surname, email, position, pageable);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/employees/delete/{id}")
     public void deleteEmployee(
             @PathVariable("id") int id) {

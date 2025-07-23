@@ -22,6 +22,7 @@ public class ClientController {
         this.clientService = clientService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/clients/create")
     public ClientDTO createClient(
             @RequestBody @Valid ClientDTO client) {
@@ -57,6 +58,7 @@ public class ClientController {
         return clientService.getAllClients(name, surname, email, phone, hasOrders, pageable);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/clients/delete/{id}")
     public void deleteClient(
             @PathVariable("id") int id) {

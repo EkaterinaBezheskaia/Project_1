@@ -47,6 +47,13 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Название должно быть уникальным");
         }
 
+        if (!product.getName().matches("[A-Za-zА-Яа-я0-9]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное название");
+        }
+        if (!product.getDescription().matches("[A-Za-zА-Яа-я0-9]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное описание");
+        }
+
         ProductEntity productEntity = productMapper.toProductEntity(product);
         return productMapper.toProductDTO(productRepository.save(productEntity));
     }

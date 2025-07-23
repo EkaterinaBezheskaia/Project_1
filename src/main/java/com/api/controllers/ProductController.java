@@ -20,6 +20,7 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/products/create")
     public ProductDTO addProduct(
             @RequestBody @Valid ProductDTO product) {
@@ -54,6 +55,7 @@ public class ProductController {
         return productService.getAllProducts(name, description, price, pageable);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/products/delete/{id}")
     public void deleteProduct(
             @PathVariable("id") int id) {

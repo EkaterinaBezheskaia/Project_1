@@ -59,6 +59,12 @@ public class ClientService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Телефон уже используется");
         }
 
+        if (!client.getName().matches("[A-Za-zА-Яа-я]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
+        }
+        if (!client.getSurname().matches("[A-Za-zА-Яа-я]")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
+        }
         if (!EMAIL_VALIDATOR.isValid(client.getEmailAddress())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
         }
@@ -81,11 +87,17 @@ public class ClientService {
                     if (value == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
                     }
+                    if (!value.matches("[A-Za-zА-Яа-я]")) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
+                    }
                     clientEntity.setName(value);
                 }
                 case "surname" -> {
                     if (value == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия не может быть пустой");
+                    }
+                    if (!value.matches("[A-Za-zА-Яа-я]")) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
                     }
                     clientEntity.setSurname(value);
                 }
