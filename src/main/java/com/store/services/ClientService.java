@@ -2,15 +2,11 @@ package com.store.services;
 
 import com.api.dto.ClientDTO;
 import com.api.mappers.ClientMapper;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +17,7 @@ import com.store.entities.ClientEntity;
 import com.store.repositories.ClientRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.ArrayList;
@@ -40,80 +37,79 @@ public class ClientService {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ClientDTO createClient(ClientDTO client) {
         if (clientRepository.existsByNameAndSurnameAndEmailAddressAndPhoneNumber(client.getName(), client.getSurname(), client.getEmailAddress(), client.getPhoneNumber())) {
-            throw new EntityExistsException("Клиент уже существует");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Клиент уже существует");
         }
         if (client.getName() == null || client.getName().isBlank()) {
-            throw new IllegalArgumentException("Имя обязательно");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя обязательно");
         }
         if (client.getSurname() == null || client.getSurname().isBlank()) {
-            throw new IllegalArgumentException("Фамилия обязательна");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия обязательна");
         }
         if (client.getEmailAddress() == null || client.getEmailAddress().isBlank()) {
-            throw new IllegalArgumentException("Email обязателен");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email обязателен");
         }
         if (client.getPhoneNumber() == null || client.getPhoneNumber().isBlank()) {
-            throw new IllegalArgumentException("Телефон обязателен");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Телефон обязателен");
         }
 
         if (clientRepository.existsByEmailAddress(client.getEmailAddress())) {
-            throw new DataIntegrityViolationException("Email уже используется");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже используется");
         }
         if (clientRepository.existsByPhoneNumber(client.getPhoneNumber())) {
-            throw new DataIntegrityViolationException("Телефон уже используется");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Телефон уже используется");
         }
 
         if (!EMAIL_VALIDATOR.isValid(client.getEmailAddress())) {
-            throw new IllegalArgumentException("Некорректный формат email");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
         }
         if (!client.getPhoneNumber().matches("^[0-9]{10}$")) {
-            throw new IllegalArgumentException("Некорректный формат телефонного номера");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат телефонного номера");
         }
 
         ClientEntity clientEntity = clientMapper.toClientEntity(client);
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
     public ClientDTO updateClient(int id, Map<String, String> updates) {
 
         ClientEntity clientEntity = clientRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Клиент не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Клиент не найден"));
 
         updates.forEach((key, value) -> {
             switch (key) {
                 case "name" -> {
                     if (value == null) {
-                        throw new IllegalArgumentException("Имя не может быть пустым");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
                     }
                     clientEntity.setName(value);
                 }
                 case "surname" -> {
                     if (value == null) {
-                        throw new IllegalArgumentException("Фамилия не может быть пустой");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия не может быть пустой");
                     }
                     clientEntity.setSurname(value);
                 }
                 case "emailAddress" -> {
                     if (value == null) {
-                        throw new IllegalArgumentException("Email не может быть пустым");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email не может быть пустым");
                     }
                     if (!EMAIL_VALIDATOR.isValid(value)) {
-                        throw new IllegalArgumentException("Некорректный формат email");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
                     }
                     if (clientRepository.existsByEmailAddress(value)) {
-                        throw new DataIntegrityViolationException("Email уже существует");
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
                     }
                     clientEntity.setEmailAddress(value);
                 }
                 case "phoneNumber" -> {
                     if (value == null) {
-                        throw new IllegalArgumentException("Номер телефона не может быть пустым");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Номер телефона не может быть пустым");
                     }
                     if (!value.matches("^[0-9]{10}$")) {
-                        throw new IllegalArgumentException("Некорректный формат телефонного номера");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат телефонного номера");
                     }
                     if (clientRepository.existsByPhoneNumber(value)) {
-                        throw new DataIntegrityViolationException("Номер телефона уже существует");
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Номер телефона уже существует");
                     }
                     clientEntity.setPhoneNumber(value);
                 }
@@ -158,7 +154,7 @@ public class ClientService {
 
     public void deleteClient(int id) {
         if (!clientRepository.existsById(id)) {
-            throw new EmptyResultDataAccessException("Нет клиента с id: " + id, 1);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Нет клиента с запрошенным id");
         }
         clientRepository.deleteById(id);
     }

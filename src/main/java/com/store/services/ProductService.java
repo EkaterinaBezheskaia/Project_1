@@ -2,13 +2,10 @@ package com.store.services;
 
 import com.api.dto.ProductDTO;
 import com.api.mappers.ProductMapper;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +16,7 @@ import com.store.entities.ProductEntity;
 import com.store.repositories.ProductRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,17 +34,17 @@ public class ProductService {
     public ProductDTO addProduct(ProductDTO product) {
 
         if (product.getName() == null || product.getName().isBlank()) {
-            throw new IllegalArgumentException("Название обязательно");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Название обязательно");
         }
         if (product.getDescription() == null || product.getDescription().isBlank()) {
-            throw new IllegalArgumentException("Описание обязательно");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание обязательно");
         }
         if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Цена обязательна");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Цена обязательна");
         }
 
         if (productRepository.existsByName(product.getName())) {
-            throw new DataIntegrityViolationException("Название должно быть уникальным");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Название должно быть уникальным");
         }
 
         ProductEntity productEntity = productMapper.toProductEntity(product);
@@ -57,10 +55,10 @@ public class ProductService {
 
         ProductEntity productEntity = productRepository
                 .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Товар не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Товар не найден"));
 
         if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("Описание обязательно");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание обязательно");
         }
 
         if (Objects.equals(productEntity.getDescription(), description)) {
@@ -101,7 +99,7 @@ public class ProductService {
 
     public void deleteProduct(int id) {
         if (!productRepository.existsById(id)) {
-            throw new EmptyResultDataAccessException("Нет продукта с id: " + id, 1);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Нет продукта с запрошенным id");
         }
         productRepository.deleteById(id);
     }

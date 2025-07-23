@@ -3,17 +3,17 @@ package com.store.services;
 import com.api.dto.OrderDTO;
 import com.api.mappers.OrderMapper;
 import com.store.entities.Status;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.OrderEntity;
 import com.store.repositories.OrderRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,11 +32,11 @@ public class OrderService {
 
     public OrderDTO createOrder(OrderDTO order) {
          if (order.getStatus() == null) {
-             throw new IllegalArgumentException("Статус обязателен");
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус обязателен");
          }
          Status status = order.getStatus();
          if (!statusSet.contains(status)) {
-             throw new IllegalArgumentException("Статус должен быть: " + Status.listAll());
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
          }
 
         OrderEntity orderEntity = orderMapper.toOrderEntity(order);
@@ -47,13 +47,13 @@ public class OrderService {
 
         OrderEntity orderEntity = orderRepository
                 .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Заказ не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ не найден"));
 
         if (status == null) {
-            throw new IllegalArgumentException("Статус обязателен");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус обязателен");
         }
         if (!statusSet.contains(status)) {
-            throw new IllegalArgumentException("Статус должен быть: " + Status.listAll());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
         }
 
         orderEntity.setStatus(status);
@@ -83,7 +83,7 @@ public class OrderService {
 
     public void deleteOrder(int id) {
         if (!orderRepository.existsById(id)) {
-            throw new EmptyResultDataAccessException("Нет заказа с id: " + id, 1);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Нет заказа с запрошенным id");
         }
         orderRepository.deleteById(id);
     }
