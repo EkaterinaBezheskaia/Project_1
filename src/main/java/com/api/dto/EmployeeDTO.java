@@ -2,6 +2,7 @@ package com.api.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import com.store.entities.Position;
@@ -27,6 +28,6 @@ public class EmployeeDTO {
     @NotBlank(message = "Пароль обязательно")
     String password;
 
-    @NotBlank(message = "Позиция обязательно")
+    @NotNull(message = "Позиция обязательно")
     Position position;
 }

@@ -2,6 +2,7 @@ package com.api.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -19,7 +20,7 @@ public class ProductDTO {
     @NotBlank(message = "Описание обязательно")
     String description;
 
-    @NotBlank(message = "Цена обязательно")
+    @NotNull(message = "Цена обязательно")
     @Min(value = 0, message = "Цена должна быть положительной")
     Long price;
 }

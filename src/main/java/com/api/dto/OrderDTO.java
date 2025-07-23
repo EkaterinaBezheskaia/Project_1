@@ -1,6 +1,7 @@
 package com.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import com.store.entities.Status;
@@ -18,7 +19,7 @@ public class OrderDTO {
     int id;
     Instant createdAt;
 
-    @NotBlank(message = "Статус обязательно")
+    @NotNull(message = "Статус обязательно")
     Status status;
 
     List<ProductDTO> products = new ArrayList<>();
