@@ -9,15 +9,18 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.EmployeeEntity;
 import com.store.repositories.EmployeeRepository;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.*;
 
@@ -32,9 +35,10 @@ public class EmployeeService {
     private static final Set<Position> ALLOWED_POSITIONS =
             EnumSet.of(Position.ADMINISTRATOR, Position.MANAGER);
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     public EmployeeDTO addEmployee(EmployeeDTO employee) {
-        if (employeeRepository.findByNameAndSurname(employee.getName(), employee.getSurname())) {
-            throw new IllegalArgumentException("Работник с таким именем и фамилией уже существует");
+        if (employeeRepository.existsByNameAndSurnameAndPosition(employee.getName(), employee.getSurname(), employee.getPosition())) {
+            throw new DataIntegrityViolationException("Работник с таким именем и фамилией уже существует");
         }
 
         if (employee.getName() == null || employee.getName().isEmpty()) {
@@ -67,13 +71,14 @@ public class EmployeeService {
         return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     public EmployeeDTO updateEmployee(int id, Map<String, Object> employee) {
 
         EmployeeEntity employeeEntity = employeeRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Работник не найден"));
 
-        if (employeeRepository.findByNameAndSurname(employeeEntity.getName(), employeeEntity.getSurname())) {
+        if (employeeRepository.existsByNameAndSurnameAndPosition(employeeEntity.getName(), employeeEntity.getSurname(), employeeEntity.getPosition())) {
             throw new IllegalArgumentException("Работник с таким ФИО и должностью уже существует");
         }
 
@@ -99,7 +104,7 @@ public class EmployeeService {
                         throw new IllegalArgumentException("Некорректный формат email");
                     }
                     if(employeeRepository.existsByEmailAddress((String) value)) {
-                        throw new IllegalArgumentException("Email уже существует");
+                        throw new DataIntegrityViolationException("Email уже существует");
                     }
                     employeeEntity.setEmailAddress((String) value);
                 }
@@ -111,7 +116,7 @@ public class EmployeeService {
                         throw new IllegalArgumentException("Пароль должен быть не менее 6 символов");
                     }
                     if (employeeRepository.existsByPassword((String) value)){
-                        throw new IllegalArgumentException("Пароль уже существует");
+                        throw new DataIntegrityViolationException("Пароль уже существует");
                     }
                     employeeEntity.setPassword((String) value);
                 }

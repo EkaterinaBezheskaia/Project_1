@@ -1,6 +1,7 @@
 package com.store.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -25,6 +26,7 @@ public class EmployeeEntity {
     private String surname;
 
     @Column(name = "employees_email_address", unique = true, nullable = false)
+    @Email
     private String emailAddress;
 
     @Column(name = "employees_password", nullable = false)

@@ -2,21 +2,25 @@ package com.store.services;
 
 import com.api.dto.ClientDTO;
 import com.api.mappers.ClientMapper;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.ClientEntity;
 import com.store.repositories.ClientRepository;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 
 import java.util.ArrayList;
@@ -32,8 +36,12 @@ public class ClientService {
     private final ClientMapper clientMapper;
     private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
 
-    public ClientDTO createClient(ClientDTO client) {
 
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ClientDTO createClient(ClientDTO client) {
+        if (clientRepository.existsByNameAndSurnameAndEmailAddressAndPhoneNumber(client.getName(), client.getSurname(), client.getEmailAddress(), client.getPhoneNumber())) {
+            throw new EntityExistsException("Клиент уже существует");
+        }
         if (client.getName() == null || client.getName().isBlank()) {
             throw new IllegalArgumentException("Имя обязательно");
         }
@@ -48,10 +56,10 @@ public class ClientService {
         }
 
         if (clientRepository.existsByEmailAddress(client.getEmailAddress())) {
-            throw new IllegalArgumentException("Email уже используется");
+            throw new DataIntegrityViolationException("Email уже используется");
         }
         if (clientRepository.existsByPhoneNumber(client.getPhoneNumber())) {
-            throw new IllegalArgumentException("Телефон уже используется");
+            throw new DataIntegrityViolationException("Телефон уже используется");
         }
 
         if (!EMAIL_VALIDATOR.isValid(client.getEmailAddress())) {
@@ -65,6 +73,7 @@ public class ClientService {
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ClientDTO updateClient(int id, Map<String, String> updates) {
 
         ClientEntity clientEntity = clientRepository.findById(id)
@@ -92,7 +101,7 @@ public class ClientService {
                         throw new IllegalArgumentException("Некорректный формат email");
                     }
                     if (clientRepository.existsByEmailAddress(value)) {
-                        throw new IllegalArgumentException("Email уже существует");
+                        throw new DataIntegrityViolationException("Email уже существует");
                     }
                     clientEntity.setEmailAddress(value);
                 }
@@ -104,7 +113,7 @@ public class ClientService {
                         throw new IllegalArgumentException("Некорректный формат телефонного номера");
                     }
                     if (clientRepository.existsByPhoneNumber(value)) {
-                        throw new IllegalArgumentException("Номер телефона уже существует");
+                        throw new DataIntegrityViolationException("Номер телефона уже существует");
                     }
                     clientEntity.setPhoneNumber(value);
                 }

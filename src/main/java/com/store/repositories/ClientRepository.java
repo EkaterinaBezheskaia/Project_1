@@ -10,4 +10,6 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Integer>, 
     boolean existsByEmailAddress(String emailAddress);
 
     boolean existsByPhoneNumber(String phoneNumber);
+
+    boolean existsByNameAndSurnameAndEmailAddressAndPhoneNumber(String name, String surname, String emailAddress, String phoneNumber);
 }

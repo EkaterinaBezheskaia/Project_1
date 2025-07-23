@@ -1,15 +1,15 @@
 package com.api.controllers;
 
 import com.api.dto.ProductDTO;
+import com.store.services.ProductService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import com.store.services.ProductService;
-
-import java.util.List;
 
 @RestController
 public class ProductController {
@@ -20,28 +20,29 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/products/create")
     public ProductDTO addProduct(
-            @RequestBody ProductDTO product) {
+            @RequestBody @Valid ProductDTO product) {
         return productService.addProduct(product);
     }
 
     @PatchMapping("/products/update/description/{id}")
     public ProductDTO updateProduct(
-            @PathVariable int id,
+            @PathVariable("id") int id,
             @RequestBody String description) {
         return productService.updateProduct(id, description);
     }
 
     @GetMapping("/products/get_all")
     public Page<ProductDTO> getAllProducts(
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "id") @Pattern(regexp = "id|name|description|price") String sortBy,
-            @RequestParam(required = false, defaultValue = "asc") String direction,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) Long price
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|name|description|price") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "description", required = false) String description,
+            @RequestParam(name = "price", required = false) Long price
     ) {
 
         Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
@@ -54,9 +55,10 @@ public class ProductController {
         return productService.getAllProducts(name, description, price, pageable);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/products/delete/{id}")
     public void deleteProduct(
-            @PathVariable int id) {
+            @PathVariable("id") int id) {
         productService.deleteProduct(id);
     }
 }

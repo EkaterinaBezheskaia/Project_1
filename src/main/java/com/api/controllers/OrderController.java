@@ -2,16 +2,17 @@ package com.api.controllers;
 
 import com.api.dto.OrderDTO;
 import com.store.entities.Status;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.store.services.OrderService;
 
 import java.time.Instant;
-import java.util.List;
 
 @RestController
 public class OrderController {
@@ -22,27 +23,28 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/orders/create")
     public OrderDTO createOrder(
-            @RequestBody OrderDTO order) {
+            @RequestBody @Valid OrderDTO order) {
         return orderService.createOrder(order);
     }
 
     @PatchMapping("/orders/update/{id}")
     public OrderDTO updateOrder(
-            @PathVariable int id,
+            @PathVariable("id") int id,
             @RequestBody Status status) {
         return orderService.updateOrder(id, status);
     }
 
     @GetMapping("/orders/get_all")
     public Page<OrderDTO> getAllOrders(
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "id") @Pattern(regexp = "id|createdAt|status") String sortBy,
-            @RequestParam(required = false, defaultValue = "asc") String direction,
-            @RequestParam(required = false) Instant createdAt,
-            @RequestParam(required = false) Status status
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|createdAt|status") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction,
+            @RequestParam(name = "createdAt", required = false) Instant createdAt,
+            @RequestParam(name = "status", required = false) Status status
             ) {
 
         Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
@@ -55,9 +57,10 @@ public class OrderController {
         return orderService.getAllOrders(createdAt, status, pageable);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/orders/delete/{id}")
     public void deleteOrder(
-            @PathVariable int id) {
+            @PathVariable("id") int id) {
         orderService.deleteOrder(id);
     }
 }

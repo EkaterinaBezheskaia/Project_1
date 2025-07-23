@@ -1,5 +1,6 @@
 package com.api.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import com.store.entities.Status;
@@ -16,7 +17,11 @@ import java.util.List;
 public class OrderDTO {
     int id;
     Instant createdAt;
+
+    @NotBlank(message = "Статус обязательно")
     Status status;
+
     List<ProductDTO> products = new ArrayList<>();
+
     ClientDTO client;
 }

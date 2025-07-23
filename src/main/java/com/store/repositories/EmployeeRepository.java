@@ -1,5 +1,6 @@
 package com.store.repositories;
 
+import com.store.entities.Position;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,5 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Intege
 
     boolean existsByPassword(String value);
 
-    boolean findByNameAndSurname(String name, String surname);
+    boolean existsByNameAndSurnameAndPosition(String name, String surname, Position position);
 }

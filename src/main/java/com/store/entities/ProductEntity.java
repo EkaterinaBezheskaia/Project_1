@@ -1,6 +1,7 @@
 package com.store.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 @Getter
@@ -24,5 +25,6 @@ public class ProductEntity {
     private String description;
 
     @Column(name = "products_price", nullable = false)
+    @Min(0)
     private Long price;
 }
