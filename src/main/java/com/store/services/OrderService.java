@@ -40,7 +40,7 @@ public class OrderService {
          }
 
         OrderEntity orderEntity = orderMapper.toOrderEntity(order);
-        return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
+        return orderMapper.toOrderDTO(orderRepository.saveAndFlush(orderEntity));
     }
 
     public OrderDTO updateOrder(int id, Status status) {
@@ -57,7 +57,7 @@ public class OrderService {
         }
 
         orderEntity.setStatus(status);
-        return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
+        return orderMapper.toOrderDTO(orderRepository.saveAndFlush(orderEntity));
     }
 
     public Page<OrderDTO> getAllOrders(Instant createdAt, Status status, Pageable pageable) {

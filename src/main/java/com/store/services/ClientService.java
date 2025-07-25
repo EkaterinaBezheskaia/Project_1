@@ -73,7 +73,7 @@ public class ClientService {
         }
 
         ClientEntity clientEntity = clientMapper.toClientEntity(client);
-        return clientMapper.toClientDTO(clientRepository.save(clientEntity));
+        return clientMapper.toClientDTO(clientRepository.saveAndFlush(clientEntity));
     }
 
     public ClientDTO updateClient(int id, Map<String, String> updates) {
@@ -128,7 +128,7 @@ public class ClientService {
             }
         });
 
-        return clientMapper.toClientDTO(clientRepository.save(clientEntity));
+        return clientMapper.toClientDTO(clientRepository.saveAndFlush(clientEntity));
     }
 
     @Transactional(readOnly = true)

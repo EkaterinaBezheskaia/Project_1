@@ -77,7 +77,7 @@ public class EmployeeService {
         }
 
         EmployeeEntity employeeEntity = employeeMapper.toEmployeeEntity(employee);
-        return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
+        return employeeMapper.toEmployeeDTO(employeeRepository.saveAndFlush(employeeEntity));
     }
 
     public EmployeeDTO updateEmployee(int id, Map<String, Object> employee) {
@@ -139,7 +139,7 @@ public class EmployeeService {
             }
         });
 
-        return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
+        return employeeMapper.toEmployeeDTO(employeeRepository.saveAndFlush(employeeEntity));
     }
 
     @Transactional(readOnly = true)
