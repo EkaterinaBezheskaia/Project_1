@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Transactional
@@ -50,10 +51,10 @@ public class EmployeeService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль обязателен");
         }
 
-        if (!employee.getName().matches("[A-Za-zА-Яа-я]")) {
+        if (!employee.getName().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
         }
-        if (!employee.getSurname().matches("[A-Za-zА-Яа-я]")) {
+        if (!employee.getSurname().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
         }
         if(!EMAIL_VALIDATOR_2.isValid(employee.getEmailAddress())) {
@@ -66,81 +67,88 @@ public class EmployeeService {
         if(employeeRepository.existsByEmailAddress(employee.getEmailAddress())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
         }
-        if (employeeRepository.existsByPassword(employee.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Придумайте другой пароль");
-        }
 
         Position pos = employee.getPosition();
         if (pos == null || !ALLOWED_POSITIONS.contains(pos)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Позиция должна быть Администратором или Менеджером");
+                    "Позиция должна быть MANAGER или ADMINISTRATOR");
         }
 
         EmployeeEntity employeeEntity = employeeMapper.toEmployeeEntity(employee);
-        return employeeMapper.toEmployeeDTO(employeeRepository.saveAndFlush(employeeEntity));
+        return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }
 
-    public EmployeeDTO updateEmployee(int id, Map<String, Object> employee) {
+    public EmployeeDTO updateEmployee(int id, Map<String, String> employee) {
 
         EmployeeEntity employeeEntity = employeeRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Работник не найден"));
 
-        if (employeeRepository.existsByNameAndSurnameAndPosition(employeeEntity.getName(), employeeEntity.getSurname(), employeeEntity.getPosition())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Работник с таким ФИО и должностью уже существует");
-        }
+        AtomicReference<String> newName = new AtomicReference<>(employeeEntity.getName());
+        AtomicReference<String> newSurname = new AtomicReference<>(employeeEntity.getSurname());
+        AtomicReference<Position> newPosition  = new AtomicReference<>(employeeEntity.getPosition());
 
         employee.forEach((key, value) -> {
             switch (key) {
                 case "name" -> {
-                    if (value == null) {
+                    if (value.trim().isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
                     }
-                    employeeEntity.setName((String) value);
+                    if (!value.trim().matches("[A-Za-zА-Яа-яЁё]+")) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
+                    }
+                    newName.set(value.trim());
                 }
                 case "surname" -> {
-                    if (value == null) {
+                    if (value.trim().isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия не может быть пустой");
                     }
-                    employeeEntity.setSurname((String) value);
+                    if (!value.trim().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
+                    }
+                    newSurname.set(value.trim());
                 }
                 case "email" -> {
-                    if (value == null) {
+                    if (value.trim().isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email не может быть пустым");
                     }
-                    if(!EMAIL_VALIDATOR_2.isValid((String) value)) {
+                    if(!EMAIL_VALIDATOR_2.isValid(value.trim())) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
                     }
-                    if(employeeRepository.existsByEmailAddress((String) value)) {
+                    if(employeeRepository.existsByEmailAddress(value.trim())) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
                     }
-                    employeeEntity.setEmailAddress((String) value);
+                    employeeEntity.setEmailAddress(value.trim());
                 }
                 case "password" -> {
-                    if (value == null) {
+                    if (value.trim().isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль не может быть пустым");
                     }
-                    if (((String) value).length() < 6 ) {
+                    if (value.trim().length() < 6 ) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль должен быть не менее 6 символов");
                     }
-                    if (employeeRepository.existsByPassword((String) value)){
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Придумайте другой пароль");
-                    }
-                    employeeEntity.setPassword((String) value);
+                    employeeEntity.setPassword(value.trim());
                 }
                 case "position" -> {
-                    Position pos = (Position) value;
-                    if (pos == null || !ALLOWED_POSITIONS.contains(pos)) {
+                    Position pos = Position.valueOf(value.trim());
+                    if (pos != Position.MANAGER && pos != Position.ADMINISTRATOR) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Позиция должна быть Администратором или Менеджером");
-                    }
-                    employeeEntity.setPosition((Position) value);
+                                "Должность должна быть MANAGER или ADMINISTRATOR");
+                        }
+                    newPosition.set(Position.valueOf(value.trim()));
                 }
+                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле");
             }
         });
 
-        return employeeMapper.toEmployeeDTO(employeeRepository.saveAndFlush(employeeEntity));
+        if (employeeRepository.existsByNameAndSurnameAndPosition(newName.get(), newSurname.get(), newPosition.get())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Работник с таким ФИО и должностью уже существует");
+        }
+
+        return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }
+
+
 
     @Transactional(readOnly = true)
     public EmployeeDTO getEmployeeById(int id) {

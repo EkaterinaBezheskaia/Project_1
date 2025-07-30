@@ -55,7 +55,7 @@ public class ProductService {
         }
 
         ProductEntity productEntity = productMapper.toProductEntity(product);
-        return productMapper.toProductDTO(productRepository.saveAndFlush(productEntity));
+        return productMapper.toProductDTO(productRepository.save(productEntity));
     }
 
     public ProductDTO updateProduct(int id, String description) {
@@ -73,7 +73,7 @@ public class ProductService {
         }
         productEntity.setDescription(description);
 
-        return productMapper.toProductDTO(productRepository.saveAndFlush(productEntity));
+        return productMapper.toProductDTO(productRepository.save(productEntity));
     }
 
     @Transactional(readOnly = true)

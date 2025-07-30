@@ -33,7 +33,7 @@ public class EmployeeController {
     @PatchMapping("/employees/update/{id}")
     public EmployeeDTO updateEmployee(
             @PathVariable("id") int id,
-            @RequestBody Map<String, Object> employee) {
+            @RequestBody Map<String, String> employee) {
         return employeeService.updateEmployee(id, employee);
     }
 

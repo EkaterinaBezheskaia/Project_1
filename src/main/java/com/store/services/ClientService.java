@@ -59,10 +59,10 @@ public class ClientService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Телефон уже используется");
         }
 
-        if (!client.getName().matches("[A-Za-zА-Яа-я]")) {
+        if (!client.getName().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
         }
-        if (!client.getSurname().matches("[A-Za-zА-Яа-я]")) {
+        if (!client.getSurname().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
         }
         if (!EMAIL_VALIDATOR.isValid(client.getEmailAddress())) {
@@ -73,7 +73,8 @@ public class ClientService {
         }
 
         ClientEntity clientEntity = clientMapper.toClientEntity(client);
-        return clientMapper.toClientDTO(clientRepository.saveAndFlush(clientEntity));
+
+        return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
     public ClientDTO updateClient(int id, Map<String, String> updates) {
@@ -87,7 +88,7 @@ public class ClientService {
                     if (value == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
                     }
-                    if (!value.matches("[A-Za-zА-Яа-я]")) {
+                    if (!value.matches("[A-Za-zА-Яа-яЁё\\s]+")) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
                     }
                     clientEntity.setName(value);
@@ -96,7 +97,7 @@ public class ClientService {
                     if (value == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия не может быть пустой");
                     }
-                    if (!value.matches("[A-Za-zА-Яа-я]")) {
+                    if (!value.matches("[A-Za-zА-Яа-яЁё\\s]+")) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
                     }
                     clientEntity.setSurname(value);
@@ -128,7 +129,7 @@ public class ClientService {
             }
         });
 
-        return clientMapper.toClientDTO(clientRepository.saveAndFlush(clientEntity));
+        return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
     @Transactional(readOnly = true)
