@@ -67,7 +67,7 @@ public class ProductService {
         if (description == null || description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание обязательно");
         }
-        if (!description.matches("[A-Za-zА-Яа-я0-9]+")) {
+        if (!description.matches("^(?!\\\\s+$)[A-Za-zА-Яа-яёЁ0-9\\\\s]+$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное описание");
         }
 

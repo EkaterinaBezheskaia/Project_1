@@ -1,8 +1,13 @@
 package com.store.services;
 
 import com.api.dto.OrderDTO;
+import com.api.dto.ProductDTO;
 import com.api.mappers.OrderMapper;
+import com.store.entities.ClientEntity;
+import com.store.entities.ProductEntity;
 import com.store.entities.Status;
+import com.store.repositories.ClientRepository;
+import com.store.repositories.ProductRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +25,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,19 +33,22 @@ import java.util.Set;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final ClientRepository clientRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final Set<Status> statusSet = EnumSet.allOf(Status.class);
 
-    public OrderDTO createOrder(OrderDTO order) {
-         if (order.getStatus() == null) {
+    public OrderDTO createOrder(OrderDTO orderDTO) {
+
+        if (orderDTO.getStatus() == null) {
              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус обязателен");
          }
-         Status status = order.getStatus();
+         Status status = orderDTO.getStatus();
          if (!statusSet.contains(status)) {
              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
          }
 
-        OrderEntity orderEntity = orderMapper.toOrderEntity(order);
+        OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO);
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 

@@ -68,7 +68,13 @@ public class EmployeeService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
         }
 
-        Position pos = employee.getPosition();
+        Position pos;
+        try {
+            pos = employee.getPosition();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Позиция должна быть MANAGER или ADMINISTRATOR");
+        }
         if (pos == null || !ALLOWED_POSITIONS.contains(pos)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Позиция должна быть MANAGER или ADMINISTRATOR");
@@ -84,9 +90,7 @@ public class EmployeeService {
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Работник не найден"));
 
-        AtomicReference<String> newName = new AtomicReference<>(employeeEntity.getName());
-        AtomicReference<String> newSurname = new AtomicReference<>(employeeEntity.getSurname());
-        AtomicReference<Position> newPosition  = new AtomicReference<>(employeeEntity.getPosition());
+
 
         employee.forEach((key, value) -> {
             switch (key) {
@@ -97,7 +101,7 @@ public class EmployeeService {
                     if (!value.trim().matches("[A-Za-zА-Яа-яЁё]+")) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
                     }
-                    newName.set(value.trim());
+                    employeeEntity.setName(value.trim());
                 }
                 case "surname" -> {
                     if (value.trim().isEmpty()) {
@@ -106,7 +110,7 @@ public class EmployeeService {
                     if (!value.trim().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
                     }
-                    newSurname.set(value.trim());
+                    employeeEntity.setSurname(value.trim());
                 }
                 case "email" -> {
                     if (value.trim().isEmpty()) {
@@ -115,7 +119,8 @@ public class EmployeeService {
                     if(!EMAIL_VALIDATOR_2.isValid(value.trim())) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
                     }
-                    if(employeeRepository.existsByEmailAddress(value.trim())) {
+                    if(employeeRepository.existsByEmailAddress(value.trim()) &&
+                            !employeeEntity.getEmailAddress().equals(value)) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
                     }
                     employeeEntity.setEmailAddress(value.trim());
@@ -136,25 +141,28 @@ public class EmployeeService {
                     if (!value.trim().matches("[A-Za-z]+")) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Должность некорректна");
                     }
-                    Position pos = Position.valueOf(value.trim());
+                    Position pos;
+                    try {
+                        pos = Position.valueOf(value.trim());
+                    } catch (IllegalArgumentException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Должность должна быть MANAGER или ADMINISTRATOR");
+                    }
                     if (pos != Position.MANAGER && pos != Position.ADMINISTRATOR) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "Должность должна быть MANAGER или ADMINISTRATOR");
                         }
-                    newPosition.set(Position.valueOf(value.trim()));
+                    employeeEntity.setPosition(Position.valueOf(value.trim()));
                 }
                 default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле");
             }
         });
 
-
-        if (employeeRepository.existsByNameAndSurnameAndPosition(newName.get(), newSurname.get(), newPosition.get())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Работник с таким ФИО и должностью уже существует");
+        if (employeeRepository.existsByNameAndSurname(employeeEntity.getName(), employeeEntity.getSurname()) &&
+                !(employeeEntity.getName().equals(employeeRepository.findById(id).get().getName()) &&
+                        employeeEntity.getSurname().equals(employeeRepository.findById(id).get().getSurname()))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Сотрудник с таким именем и фамилией уже существует");
         }
-
-        employeeEntity.setName(newName.get());
-        employeeEntity.setSurname(newSurname.get());
-        employeeEntity.setPosition(newPosition.get());
 
         return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }

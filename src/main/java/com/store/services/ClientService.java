@@ -109,7 +109,8 @@ public class ClientService {
                     if (!EMAIL_VALIDATOR.isValid(value)) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
                     }
-                    if (clientRepository.existsByEmailAddress(value)) {
+                    if (clientRepository.existsByEmailAddress(value) &&
+                            !clientEntity.getEmailAddress().equals(value)) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
                     }
                     clientEntity.setEmailAddress(value);
@@ -121,7 +122,8 @@ public class ClientService {
                     if (!value.matches("^[0-9]{10}$")) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат телефонного номера");
                     }
-                    if (clientRepository.existsByPhoneNumber(value)) {
+                    if (clientRepository.existsByPhoneNumber(value) &&
+                            !clientEntity.getPhoneNumber().equals(value)) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Номер телефона уже существует");
                     }
                     clientEntity.setPhoneNumber(value);

@@ -3,6 +3,7 @@ package com.store.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -32,7 +33,7 @@ public class OrderEntity {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<ProductEntity> products;
+    private List<ProductEntity> products  = new ArrayList<>();;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)

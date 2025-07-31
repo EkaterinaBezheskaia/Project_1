@@ -12,4 +12,6 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Intege
     boolean existsByEmailAddress(String value);
 
     boolean existsByNameAndSurnameAndPosition(String name, String surname, Position position);
+
+    boolean existsByNameAndSurname(String name, String surname);
 }

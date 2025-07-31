@@ -1,6 +1,5 @@
 package com.api.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +21,8 @@ public class OrderDTO {
     @NotNull(message = "Статус обязательно")
     Status status;
 
-    List<ProductDTO> products = new ArrayList<>();
+    List<Integer> productsId = new ArrayList<>();
 
-    ClientDTO client;
+    @NotNull(message = "Клиент обязателен")
+    int clientId;
 }
