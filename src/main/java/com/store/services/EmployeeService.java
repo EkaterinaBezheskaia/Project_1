@@ -130,6 +130,9 @@ public class EmployeeService {
                     employeeEntity.setPassword(value.trim());
                 }
                 case "position" -> {
+                    if (value.trim().isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Должность не может быть пустой");
+                    }
                     Position pos = Position.valueOf(value.trim());
                     if (pos != Position.MANAGER && pos != Position.ADMINISTRATOR) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

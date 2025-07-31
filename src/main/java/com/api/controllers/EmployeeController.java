@@ -48,7 +48,7 @@ public class EmployeeController {
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|name|surname|emailAddress|position") String sortBy,
-            @RequestParam(name = "direction", required = false, defaultValue = "acs") String direction,
+            @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction,
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "surname", required = false) String surname,
             @RequestParam(name = "email", required = false) String email,
