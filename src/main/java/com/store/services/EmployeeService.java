@@ -133,6 +133,9 @@ public class EmployeeService {
                     if (value.trim().isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Должность не может быть пустой");
                     }
+                    if (!value.trim().matches("[A-Za-z]+")) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Должность некорректна");
+                    }
                     Position pos = Position.valueOf(value.trim());
                     if (pos != Position.MANAGER && pos != Position.ADMINISTRATOR) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -144,9 +147,14 @@ public class EmployeeService {
             }
         });
 
+
         if (employeeRepository.existsByNameAndSurnameAndPosition(newName.get(), newSurname.get(), newPosition.get())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Работник с таким ФИО и должностью уже существует");
         }
+
+        employeeEntity.setName(newName.get());
+        employeeEntity.setSurname(newSurname.get());
+        employeeEntity.setPosition(newPosition.get());
 
         return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }
