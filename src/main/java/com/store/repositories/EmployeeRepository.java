@@ -11,7 +11,5 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Intege
 
     boolean existsByEmailAddress(String value);
 
-    boolean existsByPassword(String value);
-
     boolean existsByNameAndSurnameAndPosition(String name, String surname, Position position);
 }
