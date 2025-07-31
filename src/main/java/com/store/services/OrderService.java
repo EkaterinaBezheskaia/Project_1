@@ -49,6 +49,7 @@ public class OrderService {
          }
 
         OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO);
+        orderEntity.setCreatedAt(Instant.now());
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 

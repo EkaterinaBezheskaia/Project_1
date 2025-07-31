@@ -67,8 +67,8 @@ public class ProductService {
         if (description == null || description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание обязательно");
         }
-        if (!description.matches("^(?!\\\\s+$)[A-Za-zА-Яа-яёЁ0-9\\\\s]+$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное описание");
+        if (!description.matches("^(?!\\s+$)[\\p{L}0-9\\s,.!?;-]+$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание содержит недопустимые символы");
         }
 
         if (Objects.equals(productEntity.getDescription(), description)) {

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -27,4 +30,7 @@ public class ProductEntity {
     @Column(name = "products_price", nullable = false)
     @Min(0)
     private Long price;
+
+    @ManyToMany(mappedBy = "products")
+    private List<OrderEntity> orders = new ArrayList<>();
 }
