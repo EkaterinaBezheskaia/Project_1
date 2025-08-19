@@ -24,26 +24,26 @@ public class EmployeeController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/employees/create")
+    @PostMapping("/employees")
     public EmployeeDTO addEmployee(
             @RequestBody @Valid EmployeeDTO employee) {
         return employeeService.addEmployee(employee);
     }
 
-    @PatchMapping("/employees/update/{id}")
+    @PatchMapping("/employees/{id}")
     public EmployeeDTO updateEmployee(
             @PathVariable("id") int id,
             @RequestBody Map<String, String> employee) {
         return employeeService.updateEmployee(id, employee);
     }
 
-    @GetMapping("/employees/get/{id}")
+    @GetMapping("/employees/{id}")
     public EmployeeDTO getEmployeeById(
             @PathVariable("id") int id) {
         return employeeService.getEmployeeById(id);
     }
 
-    @GetMapping("/employees/get")
+    @GetMapping("/employees")
     public Page<EmployeeDTO> getAllEmployees(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
@@ -65,7 +65,7 @@ public class EmployeeController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/employees/delete/{id}")
+    @DeleteMapping("/employees/{id}")
     public void deleteEmployee(
             @PathVariable("id") int id) {
         employeeService.deleteEmployee(id);

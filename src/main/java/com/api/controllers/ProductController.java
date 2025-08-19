@@ -21,20 +21,20 @@ public class ProductController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/products/create")
+    @PostMapping("/products")
     public ProductDTO addProduct(
             @RequestBody @Valid ProductDTO product) {
         return productService.addProduct(product);
     }
 
-    @PatchMapping("/products/update/description/{id}")
+    @PatchMapping("/products/{id}")
     public ProductDTO updateProduct(
             @PathVariable("id") int id,
             @RequestBody String description) {
         return productService.updateProduct(id, description);
     }
 
-    @GetMapping("/products/get_all")
+    @GetMapping("/products")
     public Page<ProductDTO> getAllProducts(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
@@ -56,7 +56,7 @@ public class ProductController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/products/delete/{id}")
+    @DeleteMapping("/products/{id}")
     public void deleteProduct(
             @PathVariable("id") int id) {
         productService.deleteProduct(id);

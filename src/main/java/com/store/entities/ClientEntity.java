@@ -2,12 +2,13 @@ package com.store.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,23 +18,40 @@ public class ClientEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "clients_id", nullable = false)
+    @Column(nullable = false)
     @Setter(AccessLevel.NONE)
     private int id;
 
-    @Column(name = "clients_name", nullable = false)
+    @Column(nullable = false)
+    @NotBlank(message = "Имя обязательно")
+    @Pattern(
+            regexp = "[A-Za-zА-Яа-яЁё\\s]+",
+            message = "Некорректное имя"
+    )
     private String name;
 
-    @Column(name = "clients_surname", nullable = false)
+    @Column(nullable = false)
+    @NotBlank(message = "Фамилия обязательна")
+    @Pattern(
+            regexp = "[A-Za-zА-Яа-яЁё\\s]+",
+            message = "Некорректная фамилия"
+    )
     private String surname;
 
-    @Column(name = "clients_email_address", unique = true, nullable = false)
-    @Email
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Email обязательно")
+    @Email(message = "Некорректный email-адрес")
     private String emailAddress;
 
-    @Column(name = "clients_phone_number", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Номер телефона обязательно")
+    @Pattern(
+            regexp = "^\\+7\\d{10}$",
+            message = "Некорректный номер телефона. Формат: +7XXXXXXXXXX"
+    )
     private String phoneNumber;
 
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderEntity> orders = new ArrayList<>();
 }

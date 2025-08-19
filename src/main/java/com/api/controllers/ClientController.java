@@ -7,13 +7,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.store.services.ClientService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/clients")
 public class ClientController {
 
     private final ClientService clientService;
@@ -22,22 +23,27 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/clients/create")
+    @PostMapping
     public ClientDTO createClient(
             @RequestBody @Valid ClientDTO client) {
         return clientService.createClient(client);
     }
 
-    @PatchMapping("/clients/update/{id}")
+    @PatchMapping("/{id}")
     public ClientDTO updateClient(
             @RequestBody Map<String, String> updates,
             @PathVariable("id") int id) {
         return clientService.updateClient(id, updates);
     }
 
-    @GetMapping("/clients/get_all")
-    public Page<ClientDTO> getClients(
+    @GetMapping("/{id}")
+    public ClientDTO getClient(
+            @PathVariable("id") int id) {
+        return clientService.getClient(id);
+    }
+
+    @GetMapping
+    public List<ClientDTO> getClients(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|name|surname|emailAddress|phoneNumber") String sortBy,
@@ -55,11 +61,11 @@ public class ClientController {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return clientService.getAllClients(name, surname, email, phone, hasOrders, pageable);
+        return clientService.getAllClients(name, surname, email, phone, hasOrders, pageable)
+                .getContent();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/clients/delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteClient(
             @PathVariable("id") int id) {
         clientService.deleteClient(id);

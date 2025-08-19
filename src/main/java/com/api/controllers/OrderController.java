@@ -24,20 +24,20 @@ public class OrderController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/orders/create")
+    @PostMapping("/orders")
     public OrderDTO createOrder(
             @RequestBody @Valid OrderDTO order) {
         return orderService.createOrder(order);
     }
 
-    @PatchMapping("/orders/update/{id}")
+    @PatchMapping("/orders/{id}")
     public OrderDTO updateOrder(
             @PathVariable("id") int id,
             @RequestBody Status status) {
         return orderService.updateOrder(id, status);
     }
 
-    @GetMapping("/orders/get_all")
+    @GetMapping("/orders")
     public Page<OrderDTO> getAllOrders(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
@@ -58,7 +58,7 @@ public class OrderController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/orders/delete/{id}")
+    @DeleteMapping("/orders/{id}")
     public void deleteOrder(
             @PathVariable("id") int id) {
         orderService.deleteOrder(id);
