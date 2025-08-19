@@ -38,7 +38,7 @@ public class ClientService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
         }
         if (clientRepository.existsByPhoneNumber(client.getPhoneNumber())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Phone number уже существует");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Номер телефона уже существует");
         }
         ClientEntity clientEntity = clientMapper.toClientEntity(client);
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
@@ -50,30 +50,19 @@ public class ClientService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Клиент не найден"));
 
         updates.forEach((key, value) -> {
-            if (key == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
-            }
+            if (key == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
+            if (value == null || value.trim().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Пустое значение для " + key);
             switch (key) {
-                case "name" -> {
-                    if (value == null || value.isBlank())
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
-                    clientEntity.setName(value);
-                }
-                case "surname" -> {
-                    if (value == null || value.isBlank())
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия не может быть пустой");
-                    clientEntity.setSurname(value);
-                }
+                case "name" -> clientEntity.setName(value);
+                case "surname" -> clientEntity.setSurname(value);
+
                 case "emailAddress" -> {
-                    if (value == null || value.isBlank())
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email не может быть пустым");
                     if (clientRepository.existsByEmailAddress(value) && !value.equals(clientEntity.getEmailAddress()))
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже используется");
                     clientEntity.setEmailAddress(value);
                 }
                 case "phoneNumber" -> {
-                    if (value == null || value.isBlank())
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Телефон не может быть пустым");
                     if (clientRepository.existsByPhoneNumber(value) && !value.equals(clientEntity.getPhoneNumber()))
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Телефон уже используется");
                     clientEntity.setPhoneNumber(value);

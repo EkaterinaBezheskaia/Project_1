@@ -21,6 +21,7 @@ import com.store.repositories.OrderRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -49,7 +50,7 @@ public class OrderService {
          }
 
         OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO);
-        orderEntity.setCreatedAt(Instant.now());
+        orderEntity.setCreationDate(LocalDateTime.now());
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 

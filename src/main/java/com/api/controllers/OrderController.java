@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import com.store.services.OrderService;
 
 import java.time.Instant;
+import java.util.List;
 
 @RestController
+@RequestMapping("/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -23,22 +25,21 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/orders")
+    @PostMapping
     public OrderDTO createOrder(
             @RequestBody @Valid OrderDTO order) {
         return orderService.createOrder(order);
     }
 
-    @PatchMapping("/orders/{id}")
+    @PatchMapping("/{id}")
     public OrderDTO updateOrder(
             @PathVariable("id") int id,
             @RequestBody Status status) {
         return orderService.updateOrder(id, status);
     }
 
-    @GetMapping("/orders")
-    public Page<OrderDTO> getAllOrders(
+    @GetMapping
+    public List<OrderDTO> getAllOrders(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|createdAt|status") String sortBy,
@@ -54,11 +55,10 @@ public class OrderController {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return orderService.getAllOrders(createdAt, status, pageable);
+        return orderService.getAllOrders(createdAt, status, pageable).getContent();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/orders/{id}")
+    @DeleteMapping("/{id}")
     public void deleteOrder(
             @PathVariable("id") int id) {
         orderService.deleteOrder(id);

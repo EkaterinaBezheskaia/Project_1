@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import com.store.entities.Status;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +16,14 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDTO {
     int id;
-    Instant createdAt;
+    LocalDateTime creationDate;
 
-    @NotNull(message = "Статус обязательно")
+    @NotNull(message = "Статус обязательно: " +
+            "NEW, PROCESSING, COMPLETED, CANCELED")
     Status status;
 
-    List<Integer> productsId = new ArrayList<>();
+    //TO DO: Необходимо, чтобы во время вызова GET на клиента выводился список с продуктами в заказах
+    List<ProductShortDTO> productsList = new ArrayList<>();
 
     @NotNull(message = "Клиент обязателен")
     int clientId;

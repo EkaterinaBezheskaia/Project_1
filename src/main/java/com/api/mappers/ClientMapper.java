@@ -8,5 +8,4 @@ import com.store.entities.ClientEntity;
 public interface ClientMapper {
     ClientDTO toClientDTO(ClientEntity clientEntity);
     ClientEntity toClientEntity(ClientDTO clientDTO);
-
 }

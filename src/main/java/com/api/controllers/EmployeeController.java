@@ -12,9 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.store.services.EmployeeService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -23,28 +25,27 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/employees")
+    @PostMapping
     public EmployeeDTO addEmployee(
             @RequestBody @Valid EmployeeDTO employee) {
         return employeeService.addEmployee(employee);
     }
 
-    @PatchMapping("/employees/{id}")
+    @PatchMapping("/{id}")
     public EmployeeDTO updateEmployee(
             @PathVariable("id") int id,
             @RequestBody Map<String, String> employee) {
         return employeeService.updateEmployee(id, employee);
     }
 
-    @GetMapping("/employees/{id}")
+    @GetMapping("/{id}")
     public EmployeeDTO getEmployeeById(
             @PathVariable("id") int id) {
         return employeeService.getEmployeeById(id);
     }
 
-    @GetMapping("/employees")
-    public Page<EmployeeDTO> getAllEmployees(
+    @GetMapping
+    public List<EmployeeDTO> getAllEmployees(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|name|surname|emailAddress|position") String sortBy,
@@ -61,11 +62,11 @@ public class EmployeeController {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return employeeService.getAllEmployees(name, surname, email, position, pageable);
+        return employeeService.getAllEmployees(name, surname, email, position, pageable)
+                .getContent();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/employees/{id}")
+    @DeleteMapping("/{id}")
     public void deleteEmployee(
             @PathVariable("id") int id) {
         employeeService.deleteEmployee(id);

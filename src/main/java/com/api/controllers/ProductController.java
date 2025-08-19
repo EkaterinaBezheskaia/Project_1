@@ -11,7 +11,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
+@RequestMapping("/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -20,22 +23,21 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/products")
+    @PostMapping
     public ProductDTO addProduct(
             @RequestBody @Valid ProductDTO product) {
         return productService.addProduct(product);
     }
 
-    @PatchMapping("/products/{id}")
+    @PatchMapping("/{id}")
     public ProductDTO updateProduct(
             @PathVariable("id") int id,
             @RequestBody String description) {
         return productService.updateProduct(id, description);
     }
 
-    @GetMapping("/products")
-    public Page<ProductDTO> getAllProducts(
+    @GetMapping
+    public List<ProductDTO> getAllProducts(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|name|description|price") String sortBy,
@@ -52,11 +54,11 @@ public class ProductController {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return productService.getAllProducts(name, description, price, pageable);
+        return productService.getAllProducts(name, description, price, pageable)
+                .getContent();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public void deleteProduct(
             @PathVariable("id") int id) {
         productService.deleteProduct(id);

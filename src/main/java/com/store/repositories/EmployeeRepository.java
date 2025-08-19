@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import com.store.entities.EmployeeEntity;
 
+import java.util.Optional;
+
 @Repository
 public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Integer>, JpaSpecificationExecutor<EmployeeEntity> {
 
@@ -14,4 +16,6 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Intege
     boolean existsByNameAndSurnameAndPosition(String name, String surname, Position position);
 
     boolean existsByNameAndSurname(String name, String surname);
+
+    Optional<EmployeeEntity> findByNameAndSurnameAndPosition(String name, String surname, Position position);
 }

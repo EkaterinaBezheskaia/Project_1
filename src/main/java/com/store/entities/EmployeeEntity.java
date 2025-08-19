@@ -30,7 +30,7 @@ public class EmployeeEntity {
     private String emailAddress;
 
     @Column(name = "employees_password", nullable = false)
-    @Length(min = 6)
+    @Length(min = 6, message = "Пароль не менее 6 символов")
     private String password;
 
     @Column(name = "employees_position", nullable = false)

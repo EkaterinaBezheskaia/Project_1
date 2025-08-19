@@ -18,11 +18,11 @@ public class ClientEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
+    @Column(name = "id", nullable = false)
     @Setter(AccessLevel.NONE)
     private int id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     @NotBlank(message = "Имя обязательно")
     @Pattern(
             regexp = "[A-Za-zА-Яа-яЁё\\s]+",
@@ -30,7 +30,7 @@ public class ClientEntity {
     )
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "surname", nullable = false)
     @NotBlank(message = "Фамилия обязательна")
     @Pattern(
             regexp = "[A-Za-zА-Яа-яЁё\\s]+",
@@ -38,12 +38,12 @@ public class ClientEntity {
     )
     private String surname;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     @NotBlank(message = "Email обязательно")
     @Email(message = "Некорректный email-адрес")
     private String emailAddress;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "phone", unique = true, nullable = false)
     @NotBlank(message = "Номер телефона обязательно")
     @Pattern(
             regexp = "^\\+7\\d{10}$",

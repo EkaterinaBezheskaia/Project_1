@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class ProductEntity {
 
     @Column(name = "products_price", nullable = false)
     @Min(0)
-    private Long price;
+    private BigDecimal price;
 
     @ManyToMany(mappedBy = "products")
     private List<OrderEntity> orders = new ArrayList<>();

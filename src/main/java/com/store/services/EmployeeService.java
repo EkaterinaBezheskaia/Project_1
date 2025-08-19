@@ -34,50 +34,9 @@ public class EmployeeService {
             EnumSet.of(Position.ADMINISTRATOR, Position.MANAGER);
 
     public EmployeeDTO addEmployee(EmployeeDTO employee) {
-        if (employeeRepository.existsByNameAndSurnameAndPosition(employee.getName(), employee.getSurname(), employee.getPosition())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Работник с таким именем и фамилией уже существует");
-        }
-
-        if (employee.getName() == null || employee.getName().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя обязательно");
-        }
-        if (employee.getSurname() == null || employee.getSurname().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия обязательна");
-        }
-        if(employee.getEmailAddress() == null || employee.getEmailAddress().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email обязателен");
-        }
-        if (employee.getPassword() == null || employee.getPassword().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль обязателен");
-        }
-
-        if (!employee.getName().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
-        }
-        if (!employee.getSurname().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
-        }
-        if(!EMAIL_VALIDATOR_2.isValid(employee.getEmailAddress())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
-        }
-        if (employee.getPassword().length() < 6) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль должен быть не менее 6 символов");
-        }
 
         if(employeeRepository.existsByEmailAddress(employee.getEmailAddress())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
-        }
-
-        Position pos;
-        try {
-            pos = employee.getPosition();
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Позиция должна быть MANAGER или ADMINISTRATOR");
-        }
-        if (pos == null || !ALLOWED_POSITIONS.contains(pos)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Позиция должна быть MANAGER или ADMINISTRATOR");
         }
 
         EmployeeEntity employeeEntity = employeeMapper.toEmployeeEntity(employee);
@@ -90,77 +49,38 @@ public class EmployeeService {
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Работник не найден"));
 
-
-
         employee.forEach((key, value) -> {
+            if (key == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
+            if (value == null || value.trim().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Пустое значение для " + key);
             switch (key) {
-                case "name" -> {
-                    if (value.trim().isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
-                    }
-                    if (!value.trim().matches("[A-Za-zА-Яа-яЁё]+")) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное имя");
-                    }
-                    employeeEntity.setName(value.trim());
-                }
-                case "surname" -> {
-                    if (value.trim().isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Фамилия не может быть пустой");
-                    }
-                    if (!value.trim().matches("[A-Za-zА-Яа-яЁё\\s]+")) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректная фамилия");
-                    }
-                    employeeEntity.setSurname(value.trim());
-                }
+                case "name" -> employeeEntity.setName(value.trim());
+                case "surname" -> employeeEntity.setSurname(value.trim());
                 case "email" -> {
-                    if (value.trim().isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email не может быть пустым");
-                    }
-                    if(!EMAIL_VALIDATOR_2.isValid(value.trim())) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
-                    }
                     if(employeeRepository.existsByEmailAddress(value.trim()) &&
-                            !employeeEntity.getEmailAddress().equals(value)) {
+                            !employeeEntity.getEmailAddress().equals(value.trim())) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
                     }
                     employeeEntity.setEmailAddress(value.trim());
                 }
-                case "password" -> {
-                    if (value.trim().isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль не может быть пустым");
-                    }
-                    if (value.trim().length() < 6 ) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пароль должен быть не менее 6 символов");
-                    }
-                    employeeEntity.setPassword(value.trim());
-                }
+                case "password" -> employeeEntity.setPassword(value.trim());
                 case "position" -> {
-                    if (value.trim().isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Должность не может быть пустой");
-                    }
-                    if (!value.trim().matches("[A-Za-z]+")) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Должность некорректна");
-                    }
-                    Position pos;
                     try {
-                        pos = Position.valueOf(value.trim());
-                    } catch (IllegalArgumentException e) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Должность должна быть MANAGER или ADMINISTRATOR");
+                        employeeEntity.setPosition(Position.valueOf(value.trim()));
+                    } catch (IllegalArgumentException ex) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное значение должности");
                     }
-                    if (pos != Position.MANAGER && pos != Position.ADMINISTRATOR) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Должность должна быть MANAGER или ADMINISTRATOR");
-                        }
-                    employeeEntity.setPosition(Position.valueOf(value.trim()));
                 }
                 default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле");
             }
         });
 
-        if (employeeRepository.existsByNameAndSurname(employeeEntity.getName(), employeeEntity.getSurname()) &&
-                !(employeeEntity.getName().equals(employeeRepository.findById(id).get().getName()) &&
-                        employeeEntity.getSurname().equals(employeeRepository.findById(id).get().getSurname()))) {
+        Optional<EmployeeEntity> sameEmployee = employeeRepository.findByNameAndSurnameAndPosition(
+                employeeEntity.getName(),
+                employeeEntity.getSurname(),
+                employeeEntity.getPosition()
+        );
+        if (sameEmployee.isPresent() && sameEmployee.get().getId() != id) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Сотрудник с таким именем и фамилией уже существует");
         }
 

@@ -2,12 +2,13 @@ package com.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.Instant;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +22,8 @@ public class OrderEntity {
     private int id;
 
     @Column(name = "orders_creationDate", nullable = false)
-    Instant createdAt = Instant.now();
+    @CreationTimestamp
+    private LocalDateTime creationDate;
 
     @Column(name = "orders_status", nullable = false)
     @Enumerated(EnumType.STRING)
