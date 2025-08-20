@@ -39,6 +39,14 @@ public class GlobalExceptionHandler {
                 .body(e.getReason());
     }
 
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<String> handleNumberFormat(NumberFormatException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Неверный формат цены");
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleOther(Exception e) {
         return ResponseEntity

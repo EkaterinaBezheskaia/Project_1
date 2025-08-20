@@ -18,9 +18,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service
 @Transactional
@@ -32,49 +31,38 @@ public class ProductService {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     public ProductDTO addProduct(ProductDTO product) {
-
-        if (product.getName() == null || product.getName().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Название обязательно");
+        if (productRepository.existsByNameAndDescription(product.getName(), product.getDescription())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Продукт с таким названием и описанием уже существует");
         }
-        if (product.getDescription() == null || product.getDescription().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание обязательно");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Цена обязательна");
-        }
-
-        if (productRepository.existsByName(product.getName())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Название должно быть уникальным");
-        }
-
-        if (!product.getName().matches("[A-Za-zА-Яа-я0-9]+")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное название");
-        }
-        if (!product.getDescription().matches("[A-Za-zА-Яа-я0-9]+")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное описание");
-        }
-
         ProductEntity productEntity = productMapper.toProductEntity(product);
         return productMapper.toProductDTO(productRepository.save(productEntity));
     }
 
-    public ProductDTO updateProduct(int id, String description) {
+    public ProductDTO updateProduct(int id, Map<String, String> updates) {
 
         ProductEntity productEntity = productRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Товар не найден"));
 
-        if (description == null || description.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание обязательно");
+        updates.forEach((key, value) -> {
+            if (key == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
+            if (value == null || value.trim().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Пустое значение для " + key);
+            value = value.trim();
+            switch (key) {
+                case "name" -> productEntity.setName(value);
+                case "description" -> productEntity.setDescription(value);
+                case "price" -> {
+                        BigDecimal price = new BigDecimal(value);
+                        productEntity.setPrice(price);
+                }
+                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле: " + key);
+            }
+        });
+        Optional<ProductEntity> sameProduct = productRepository.findByNameAndDescription(productEntity.getName(), productEntity.getDescription());
+        if (sameProduct.isPresent() && sameProduct.get().getId() != productEntity.getId()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Продукт с таким названием и описанием уже существует");
         }
-        if (!description.matches("^(?!\\s+$)[\\p{L}0-9\\s,.!?;-]+$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Описание содержит недопустимые символы");
-        }
-
-        if (Objects.equals(productEntity.getDescription(), description)) {
-            return productMapper.toProductDTO(productEntity);
-        }
-        productEntity.setDescription(description);
 
         return productMapper.toProductDTO(productRepository.save(productEntity));
     }

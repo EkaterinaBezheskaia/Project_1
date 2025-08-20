@@ -2,6 +2,7 @@ package com.store.services;
 
 import com.api.dto.OrderDTO;
 import com.api.dto.ProductDTO;
+import com.api.dto.ProductShortDTO;
 import com.api.mappers.OrderMapper;
 import com.store.entities.ClientEntity;
 import com.store.entities.ProductEntity;
@@ -41,16 +42,26 @@ public class OrderService {
 
     public OrderDTO createOrder(OrderDTO orderDTO) {
 
-        if (orderDTO.getStatus() == null) {
-             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус обязателен");
-         }
-         Status status = orderDTO.getStatus();
-         if (!statusSet.contains(status)) {
-             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
-         }
+        ClientEntity client = clientRepository.findById(orderDTO.getClientId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Клиент не найден"));
 
-        OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO);
+        List<Integer> productIds = orderDTO.getProductsList()
+                .stream().map(ProductShortDTO::getId).toList();
+
+        List<ProductEntity> products = productRepository.findAllById(productIds);
+        if (products.size() != productIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некоторые продукты не найдены");
+        }
+
+        Status status = orderDTO.getStatus();
+        if (status == null || !statusSet.contains(status)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
+        }
+
+        OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO, client, products);
         orderEntity.setCreationDate(LocalDateTime.now());
+        orderEntity.setStatus(status);
+
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 
@@ -71,13 +82,13 @@ public class OrderService {
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 
-    public Page<OrderDTO> getAllOrders(Instant createdAt, Status status, Pageable pageable) {
+    public Page<OrderDTO> getAllOrders(LocalDateTime creationDate, Status status, Pageable pageable) {
 
         Specification<OrderEntity> spec = ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (createdAt != null) {
-                predicates.add(criteriaBuilder.equal(root.get("createdAt"), createdAt));
+            if (creationDate != null) {
+                predicates.add(criteriaBuilder.equal(root.get("creationDate"), creationDate));
             }
             if (status != null) {
                 predicates.add(criteriaBuilder.equal(root.get("status"), status));

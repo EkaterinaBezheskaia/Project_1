@@ -4,14 +4,13 @@ import com.api.dto.ProductDTO;
 import com.store.services.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -31,9 +30,9 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     public ProductDTO updateProduct(
-            @PathVariable("id") int id,
-            @RequestBody String description) {
-        return productService.updateProduct(id, description);
+            @RequestBody Map<String, String> updates,
+            @PathVariable("id") int id) {
+        return productService.updateProduct(id, updates);
     }
 
     @GetMapping

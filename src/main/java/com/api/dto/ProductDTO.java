@@ -16,14 +16,14 @@ public class ProductDTO {
 
     @NotBlank(message = "Название обязательно")
     @Pattern(
-            regexp = "[A-Za-zА-Яа-яЁё0-9\\s]+",
-            message = "Некорректное имя"
+            regexp = "^[\\p{L}0-9\\s.,!?;-]+$",
+            message = "Некорректное название"
     )
     String name;
 
     @NotBlank(message = "Описание обязательно")
     @Pattern(
-            regexp = "[A-Za-zА-Яа-яЁё0-9\\s]+",
+            regexp = "^[\\p{L}0-9\\s.,!?;-]+$",
             message = "Некорректное описание"
     )
     String description;

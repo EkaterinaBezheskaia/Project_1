@@ -4,15 +4,13 @@ import com.api.dto.OrderDTO;
 import com.store.entities.Status;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.store.services.OrderService;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -42,9 +40,9 @@ public class OrderController {
     public List<OrderDTO> getAllOrders(
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|createdAt|status") String sortBy,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|creationDate|status") String sortBy,
             @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction,
-            @RequestParam(name = "createdAt", required = false) Instant createdAt,
+            @RequestParam(name = "creationDate", required = false) LocalDateTime creationDate,
             @RequestParam(name = "status", required = false) Status status
             ) {
 
@@ -55,7 +53,7 @@ public class OrderController {
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return orderService.getAllOrders(createdAt, status, pageable).getContent();
+        return orderService.getAllOrders(creationDate, status, pageable).getContent();
     }
 
     @DeleteMapping("/{id}")
