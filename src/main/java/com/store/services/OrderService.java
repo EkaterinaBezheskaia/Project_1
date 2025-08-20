@@ -51,10 +51,12 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некоторые продукты не найдены");
         }
 
-        Status status = orderDTO.getStatus();
-        if (status == null || !statusSet.contains(status)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
-        }
+//        Status status = orderDTO.getStatus();
+//        if (status == null || !statusSet.contains(status)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
+//        }
+
+        Status status = Status.NEW;
 
         OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO, client, products);
         orderEntity.setCreationDate(LocalDateTime.now());
