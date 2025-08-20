@@ -2,6 +2,8 @@ package com.store.services;
 
 import com.api.dto.ProductDTO;
 import com.api.mappers.ProductMapper;
+import com.store.specifications.ClientSpecification;
+import com.store.specifications.ProductSpecification;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -68,31 +70,15 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductDTO> getAllProducts(String name, String description, Long price, Pageable pageable) {
+    public Page<ProductDTO> getAllProducts(String name, String description, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
 
-        Specification<ProductEntity> spec = ((root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            addTextPredicate(predicates, criteriaBuilder, root, "name", name);
-            addTextPredicate(predicates, criteriaBuilder, root, "description", description);
-            if (price != null && price >= 0L) {
-                predicates.add(criteriaBuilder.equal(root.get("price"), price));
-            }
-
-            return predicates.isEmpty()
-                    ? null
-                    : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        });
-
-        return productRepository
-                .findAll(spec, pageable)
+        Specification<ProductEntity> spec =
+                ProductSpecification.nameContains(name)
+                        .and(ProductSpecification.descriptionContains(description))
+                        .and(ProductSpecification.priceBetween(minPrice, maxPrice));
+        return productRepository.findAll(spec, pageable)
                 .map(productMapper::toProductDTO);
-    }
 
-    private void addTextPredicate(List<Predicate> predicates, CriteriaBuilder cb, Root<ProductEntity> root, String field, String value) {
-        if (StringUtils.hasText(value)) {
-            predicates.add(cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%"));
-        }
     }
 
     public void deleteProduct(int id) {

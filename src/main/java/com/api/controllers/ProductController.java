@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,8 @@ public class ProductController {
             @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction,
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "description", required = false) String description,
-            @RequestParam(name = "price", required = false) Long price
+            @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(name = "minPrice", required = false) BigDecimal maxPrice
     ) {
 
         Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
@@ -52,8 +54,7 @@ public class ProductController {
 
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-
-        return productService.getAllProducts(name, description, price, pageable)
+        return productService.getAllProducts(name, description, minPrice, maxPrice, pageable)
                 .getContent();
     }
 

@@ -3,9 +3,7 @@ package com.store.services;
 import com.api.dto.EmployeeDTO;
 import com.api.mappers.EmployeeMapper;
 import com.store.entities.Position;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import com.store.specifications.EmployeeSpecification;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.data.domain.Page;
@@ -16,11 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.EmployeeEntity;
 import com.store.repositories.EmployeeRepository;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Transactional
@@ -100,30 +96,15 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public Page<EmployeeDTO> getAllEmployees(String name, String surname, String email, Position position, Pageable pageable) {
 
-        Specification<EmployeeEntity> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            addTextPredicate(predicates, cb, root, "name", name);
-            addTextPredicate(predicates, cb, root, "surname", surname);
-            addTextPredicate(predicates, cb, root, "emailAddress", email);
-            if (position != null) {
-                predicates.add(cb.equal(root.get("position"), position));
-            }
-
-            return predicates.isEmpty()
-                    ? null
-                    : cb.and(predicates.toArray(new Predicate[0]));
-        };
+        Specification<EmployeeEntity> spec =
+                EmployeeSpecification.nameContains(name)
+                        .and(EmployeeSpecification.surnameContains(surname))
+                        .and(EmployeeSpecification.emailContains(email))
+                        .and(EmployeeSpecification.positionEquals(position));
 
         return employeeRepository
                 .findAll(spec, pageable)
                 .map(employeeMapper::toEmployeeDTO);
-    }
-
-    private void addTextPredicate(List<Predicate> predicates, CriteriaBuilder cb, Root<EmployeeEntity> root, String field, String value) {
-        if (StringUtils.hasText(value)) {
-            predicates.add(cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%"));
-        }
     }
 
     public void deleteEmployee(int employeeId) {

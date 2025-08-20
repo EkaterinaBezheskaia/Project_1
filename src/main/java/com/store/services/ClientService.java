@@ -2,6 +2,7 @@ package com.store.services;
 
 import com.api.dto.ClientDTO;
 import com.api.mappers.ClientMapper;
+import com.store.specifications.ClientSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
@@ -82,36 +83,19 @@ public class ClientService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ClientDTO> getAllClients(String name, String surname, String email, String phone, Boolean hasOrders, Pageable pageable) {
+    public Page<ClientDTO> getAllClients(
+            String name, String surname, String email, String phone, Boolean hasOrders, Pageable pageable) {
 
-        Specification<ClientEntity> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            addTextPredicate(predicates, cb, root, "name", name);
-            addTextPredicate(predicates, cb, root, "surname", surname);
-            addTextPredicate(predicates, cb, root, "emailAddress", email);
-            addTextPredicate(predicates, cb, root, "phoneNumber", phone);
-
-            if (hasOrders != null) {
-                predicates.add(hasOrders
-                        ? cb.isNotEmpty(root.get("orders"))
-                        : cb.isEmpty(root.get("orders")));
-            }
-
-            return predicates.isEmpty()
-                    ? null
-                    : cb.and(predicates.toArray(new Predicate[0]));
-        };
+        Specification<ClientEntity> spec =
+                ClientSpecification.nameContains(name)
+                        .and(ClientSpecification.surnameContains(surname))
+                        .and(ClientSpecification.emailContains(email))
+                        .and(ClientSpecification.phoneContains(phone))
+                        .and(ClientSpecification.hasOrders(hasOrders));
 
         return clientRepository
                 .findAll(spec, pageable)
                 .map(clientMapper::toClientDTO);
-    }
-
-    private void addTextPredicate(List<Predicate> predicates, CriteriaBuilder cb, Root<ClientEntity> root, String field, String value) {
-        if (StringUtils.hasText(value)) {
-            predicates.add(cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%"));
-        }
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

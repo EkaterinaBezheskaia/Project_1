@@ -9,6 +9,7 @@ import com.store.entities.ProductEntity;
 import com.store.entities.Status;
 import com.store.repositories.ClientRepository;
 import com.store.repositories.ProductRepository;
+import com.store.specifications.OrderSpecification;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import com.store.repositories.OrderRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -82,22 +84,11 @@ public class OrderService {
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 
-    public Page<OrderDTO> getAllOrders(LocalDateTime creationDate, Status status, Pageable pageable) {
+    public Page<OrderDTO> getAllOrders(LocalDate creationDate, Status status, Pageable pageable) {
 
-        Specification<OrderEntity> spec = ((root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (creationDate != null) {
-                predicates.add(criteriaBuilder.equal(root.get("creationDate"), creationDate));
-            }
-            if (status != null) {
-                predicates.add(criteriaBuilder.equal(root.get("status"), status));
-            }
-
-            return predicates.isEmpty()
-                    ? null
-                    : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        });
+        Specification<OrderEntity> spec =
+                OrderSpecification.dateEquals(creationDate)
+                        .and(OrderSpecification.statusEquals(status));
         return orderRepository
                 .findAll(spec, pageable)
                 .map(orderMapper::toOrderDTO);

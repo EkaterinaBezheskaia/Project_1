@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import com.store.services.OrderService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class OrderController {
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") @Pattern(regexp = "id|creationDate|status") String sortBy,
             @RequestParam(name = "direction", required = false, defaultValue = "asc") String direction,
-            @RequestParam(name = "creationDate", required = false) LocalDateTime creationDate,
+            @RequestParam(name = "creationDate", required = false) LocalDate creationDate,
             @RequestParam(name = "status", required = false) Status status
             ) {
 
