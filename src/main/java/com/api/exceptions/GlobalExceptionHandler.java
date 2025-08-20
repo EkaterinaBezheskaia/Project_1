@@ -2,12 +2,15 @@ package com.api.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -36,6 +39,28 @@ public class GlobalExceptionHandler {
                 .body(errors);
     }
 
+    private static final Map<String, String> SORT_FIELDS = Map.of(
+            "ClientController", "id, name, surname, emailAddress, phoneNumber",
+            "ProductController", "id, name, description, price",
+            "OrderController", "id, creationDate, status",
+            "EmployeeController", "id, name, surname, emailAddress, position"
+    );
+
+    @ExceptionHandler({
+            ConstraintViolationException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class})
+    public ResponseEntity<String> handleRequestParamValidation(Exception ex) {
+        String msg = ex.getMessage();
+        for (var entry : SORT_FIELDS.entrySet()) {
+            if (msg.contains("sortBy") && msg.contains(entry.getKey())) {
+                return ResponseEntity.badRequest().body("Некорректный параметр сортировки sortBy. " +
+                        "Допустимые значения: " + entry.getValue());
+            }
+        }
+        return ResponseEntity.badRequest().body("Ошибка валидации: " + msg);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<String> handleResponseStatusException(ResponseStatusException e) {
         return ResponseEntity
@@ -56,7 +81,7 @@ public class GlobalExceptionHandler {
 
         if (cause instanceof InvalidFormatException ife && ife.getTargetType().isEnum()) {
             Class<?> enumClass = ife.getTargetType();
-            String fieldName = ife.getPathReference(); // или ife.getPath().toString()
+            String fieldName = ife.getPathReference();
 
             String allowed = Arrays.stream(enumClass.getEnumConstants())
                     .map(Object::toString)
