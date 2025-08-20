@@ -52,6 +52,6 @@ public class ClientEntity {
     private String phoneNumber;
 
     @Builder.Default
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderEntity> orders = new ArrayList<>();
 }

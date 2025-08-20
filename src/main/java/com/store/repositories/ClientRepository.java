@@ -15,12 +15,17 @@ import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<ClientEntity, Integer>, JpaSpecificationExecutor<ClientEntity> {
+
     boolean existsByEmailAddress(String emailAddress);
+
     boolean existsByPhoneNumber(String phoneNumber);
+
     @EntityGraph(attributePaths = {"orders", "orders.products"})
     Optional<ClientEntity> findById(int id);
+
     @EntityGraph(attributePaths = {"orders", "orders.products"})
     List<ClientEntity> findAll();
+
     @EntityGraph(attributePaths = {"orders", "orders.products"})
     Page<ClientEntity> findAll(Specification specification, Pageable pageable);
 

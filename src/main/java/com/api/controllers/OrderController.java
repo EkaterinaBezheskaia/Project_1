@@ -24,6 +24,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+//    TO DO: fix the creation status, when it is created, it must be NEW.
     @PostMapping
     public OrderDTO createOrder(
             @RequestBody @Valid OrderDTO order) {

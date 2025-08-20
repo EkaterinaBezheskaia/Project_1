@@ -5,8 +5,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -18,10 +18,10 @@ public class ProductEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "products_id", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
 
-    @Column(name = "products_name", unique = true, nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     @NotBlank(message = "Название обязательно")
     @Pattern(
             regexp = "^[\\p{L}0-9\\s.,!?;-]+$",
@@ -29,7 +29,7 @@ public class ProductEntity {
     )
     private String name;
 
-    @Column(name = "products_description", nullable = false)
+    @Column(name = "description", nullable = false)
     @NotBlank(message = "Описание обязательно")
     @Pattern(
             regexp = "^^[\\p{L}0-9\\s.,!?;-]+$",
@@ -37,12 +37,12 @@ public class ProductEntity {
     )
     private String description;
 
-    @Column(name = "products_price", nullable = false)
+    @Column(name = "price", nullable = false)
     @NotNull(message = "Цена обязательно")
     @DecimalMin(value = "0.0", message = "Цена должна быть положительной")
     private BigDecimal price;
 
-    @ManyToMany(mappedBy = "products")
+    @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
     @Builder.Default
-    private List<OrderEntity> orders = new ArrayList<>();
+    private Set<OrderEntity> orders = new HashSet<>();
 }
