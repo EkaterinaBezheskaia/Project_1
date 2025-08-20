@@ -9,5 +9,7 @@ import org.mapstruct.Mapping;
 public interface ClientMapper {
     @Mapping(target = "orders", source = "orders")
     ClientDTO toClientDTO(ClientEntity clientEntity);
+
+    @Mapping(target = "orders", ignore = true)
     ClientEntity toClientEntity(ClientDTO clientDTO);
 }

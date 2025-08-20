@@ -10,7 +10,6 @@ import com.store.entities.Status;
 import com.store.repositories.ClientRepository;
 import com.store.repositories.ProductRepository;
 import com.store.specifications.OrderSpecification;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,14 +21,11 @@ import com.store.entities.OrderEntity;
 import com.store.repositories.OrderRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional

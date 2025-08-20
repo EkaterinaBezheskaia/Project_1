@@ -35,7 +35,8 @@ public class OrderEntity {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<ProductEntity> products  = new ArrayList<>();;
+    @Builder.Default
+    private List<ProductEntity> products  = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)

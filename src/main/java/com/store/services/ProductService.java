@@ -4,9 +4,6 @@ import com.api.dto.ProductDTO;
 import com.api.mappers.ProductMapper;
 import com.store.specifications.ClientSpecification;
 import com.store.specifications.ProductSpecification;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.ProductEntity;
 import com.store.repositories.ProductRepository;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 

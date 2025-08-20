@@ -43,5 +43,6 @@ public class ProductEntity {
     private BigDecimal price;
 
     @ManyToMany(mappedBy = "products")
+    @Builder.Default
     private List<OrderEntity> orders = new ArrayList<>();
 }

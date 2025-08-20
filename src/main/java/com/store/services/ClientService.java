@@ -4,9 +4,6 @@ import com.api.dto.ClientDTO;
 import com.api.mappers.ClientMapper;
 import com.store.specifications.ClientSpecification;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,13 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.store.entities.ClientEntity;
 import com.store.repositories.ClientRepository;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @Service

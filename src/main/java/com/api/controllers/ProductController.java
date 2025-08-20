@@ -45,7 +45,7 @@ public class ProductController {
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "description", required = false) String description,
             @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
-            @RequestParam(name = "minPrice", required = false) BigDecimal maxPrice
+            @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice
     ) {
 
         Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")

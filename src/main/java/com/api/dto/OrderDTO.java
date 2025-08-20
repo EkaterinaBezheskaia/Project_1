@@ -23,6 +23,7 @@ public class OrderDTO {
     Status status;
 
     //TO DO: Необходимо, чтобы во время вызова GET на клиента выводился список с продуктами в заказах
+    @Builder.Default
     List<ProductShortDTO> productsList = new ArrayList<>();
 
     @NotNull(message = "Клиент обязателен")
