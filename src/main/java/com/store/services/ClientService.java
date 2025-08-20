@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -52,13 +53,17 @@ public class ClientService {
                 case "surname" -> clientEntity.setSurname(value);
 
                 case "emailAddress" -> {
-                    if (clientRepository.existsByEmailAddress(value) && !value.equals(clientEntity.getEmailAddress()))
+                    Optional<ClientEntity> existingClient = clientRepository.findByEmailAddress(value);
+                    if (existingClient.isPresent() && existingClient.get().getId() != clientEntity.getId()) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже используется");
+                    }
                     clientEntity.setEmailAddress(value);
                 }
                 case "phoneNumber" -> {
-                    if (clientRepository.existsByPhoneNumber(value) && !value.equals(clientEntity.getPhoneNumber()))
+                    Optional<ClientEntity> existingClient = clientRepository.findByPhoneNumber(value);
+                    if (existingClient.isPresent() && existingClient.get().getId() != clientEntity.getId()) {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Телефон уже используется");
+                    }
                     clientEntity.setPhoneNumber(value);
                 }
                 default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле: " + key);

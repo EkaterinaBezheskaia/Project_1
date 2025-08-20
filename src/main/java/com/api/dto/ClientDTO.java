@@ -33,6 +33,7 @@ public class ClientDTO {
 
     @NotBlank(message = "Email обязательно")
     @Email(message = "Некорректный email-адрес")
+    @Pattern(regexp = "^[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Некорректный email-адрес")
     String emailAddress;
 
     @NotBlank(message = "Номер телефона обязательно")

@@ -24,4 +24,7 @@ public interface ClientRepository extends JpaRepository<ClientEntity, Integer>, 
     @EntityGraph(attributePaths = {"orders", "orders.products"})
     Page<ClientEntity> findAll(Specification specification, Pageable pageable);
 
+    Optional<ClientEntity> findByEmailAddress(String value);
+
+    Optional<ClientEntity> findByPhoneNumber(String value);
 }
