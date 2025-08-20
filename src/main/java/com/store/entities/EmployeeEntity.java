@@ -16,24 +16,24 @@ public class EmployeeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "employees_id", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
 
-    @Column(name = "employees_name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "employees_surname", nullable = false)
+    @Column(name = "surname", nullable = false)
     private String surname;
 
-    @Column(name = "employees_email_address", unique = true, nullable = false)
+    @Column(name = "email_address", unique = true, nullable = false)
     @Email
     private String emailAddress;
 
-    @Column(name = "employees_password", nullable = false)
+    @Column(name = "password", nullable = false)
     @Length(min = 6, message = "Пароль не менее 6 символов")
     private String password;
 
-    @Column(name = "employees_position", nullable = false)
+    @Column(name = "position", nullable = false)
     @Enumerated(EnumType.STRING)
     private Position position;
 
