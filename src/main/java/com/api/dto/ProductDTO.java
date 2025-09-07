@@ -1,5 +1,6 @@
 package com.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductDTO {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     int id;
 
     @NotBlank(message = "Название обязательно")

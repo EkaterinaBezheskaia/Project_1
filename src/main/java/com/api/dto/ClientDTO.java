@@ -1,5 +1,6 @@
 package com.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -15,6 +16,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ClientDTO {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     int id;
 
     @NotBlank(message = "Имя обязательно")

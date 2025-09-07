@@ -30,9 +30,9 @@ public class ClientController {
 
     @PatchMapping("/{id}")
     public ClientDTO updateClient(
-            @RequestBody Map<String, String> updates,
+            @RequestBody @Valid ClientDTO client,
             @PathVariable("id") int id) {
-        return clientService.updateClient(id, updates);
+        return clientService.updateClient(id, client);
     }
 
     @GetMapping("/{id}")

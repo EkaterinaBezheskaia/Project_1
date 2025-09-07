@@ -16,9 +16,6 @@ import com.store.repositories.ClientRepository;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
-import java.util.Optional;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -39,36 +36,17 @@ public class ClientService {
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }
 
-    public ClientDTO updateClient(int id, Map<String, String> updates) {
+    public ClientDTO updateClient(int id, ClientDTO client) {
 
         ClientEntity clientEntity = clientRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Клиент не найден"));
 
-        updates.forEach((key, value) -> {
-            if (key == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
-            if (value == null || value.trim().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Пустое значение для " + key);
-            switch (key) {
-                case "name" -> clientEntity.setName(value);
-                case "surname" -> clientEntity.setSurname(value);
-
-                case "emailAddress" -> {
-                    Optional<ClientEntity> existingClient = clientRepository.findByEmailAddress(value);
-                    if (existingClient.isPresent() && existingClient.get().getId() != clientEntity.getId()) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже используется");
-                    }
-                    clientEntity.setEmailAddress(value);
-                }
-                case "phoneNumber" -> {
-                    Optional<ClientEntity> existingClient = clientRepository.findByPhoneNumber(value);
-                    if (existingClient.isPresent() && existingClient.get().getId() != clientEntity.getId()) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Телефон уже используется");
-                    }
-                    clientEntity.setPhoneNumber(value);
-                }
-                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле: " + key);
-            }
-        });
+        if (clientRepository.existsByEmailAddress( client.getEmailAddress())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
+        }
+        if (clientRepository.existsByPhoneNumber(client.getPhoneNumber())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Номер телефона уже существует");
+        }
 
         return clientMapper.toClientDTO(clientRepository.save(clientEntity));
     }

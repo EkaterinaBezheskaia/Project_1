@@ -2,6 +2,7 @@ package com.api.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,32 +14,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body("Не найдено:" + e.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String,String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
-        return ResponseEntity
-                .status(e.getStatusCode())
-                .body(errors);
-    }
-
     private static final Map<String, String> SORT_FIELDS = Map.of(
             "ClientController", "id, name, surname, emailAddress, phoneNumber",
             "ProductController", "id, name, description, price",
@@ -46,43 +26,95 @@ public class GlobalExceptionHandler {
             "EmployeeController", "id, name, surname, emailAddress, position"
     );
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleEntityNotFoundException(
+            EntityNotFoundException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponseDTO.buildError(
+                        HttpStatus.NOT_FOUND,
+                        "Не найдено: " + e.getMessage(),
+                        request));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponseDTO> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e,
+            HttpServletRequest request) {
+
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), error.getDefaultMessage());
+        });
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ValidationErrorResponseDTO.buildError(
+                        HttpStatus.BAD_REQUEST,
+                        "Ошибка валидации",
+                        errors,
+                        request
+                ));
+    }
+
     @ExceptionHandler({
             ConstraintViolationException.class,
             MethodArgumentTypeMismatchException.class,
-            MissingServletRequestParameterException.class})
-    public ResponseEntity<String> handleRequestParamValidation(Exception ex) {
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ValidationErrorResponseDTO> handleRequestParamValidation(
+            Exception ex,
+            HttpServletRequest request
+    ) {
         String msg = ex.getMessage();
+        String customMsg = "Ошибка валидации: " + msg;
+        Map<String, String> fieldErrors = new HashMap<>();
+
         for (var entry : SORT_FIELDS.entrySet()) {
-            if (msg.contains("sortBy") && msg.contains(entry.getKey())) {
-                return ResponseEntity.badRequest().body("Некорректный параметр сортировки sortBy. " +
-                        "Допустимые значения: " + entry.getValue());
+            if (msg != null && msg.contains("sortBy") && msg.contains(entry.getKey())) {
+                customMsg = "Некорректный параметр сортировки sortBy. Допустимые значения: " + entry.getValue();
+                fieldErrors.put("sortBy", customMsg);
             }
         }
-        return ResponseEntity.badRequest().body("Ошибка валидации: " + msg);
+
+        return ResponseEntity.badRequest().body(
+                ValidationErrorResponseDTO.buildError(
+                        HttpStatus.BAD_REQUEST,
+                        customMsg,
+                        fieldErrors,
+                        request
+                )
+        );
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException e) {
-        return ResponseEntity
-                .status(e.getStatusCode())
-                .body(e.getReason());
+    public ResponseEntity<ErrorResponseDTO> handleResponseStatusException(
+            ResponseStatusException e, HttpServletRequest request) {
+        return ResponseEntity.status(e.getStatusCode())
+                .body(ErrorResponseDTO.buildError(
+                        (HttpStatus) e.getStatusCode(),
+                        e.getReason(),
+                        request));
     }
 
     @ExceptionHandler(NumberFormatException.class)
-    public ResponseEntity<String> handleNumberFormat(NumberFormatException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body("Неверный формат цены");
+    public ResponseEntity<ErrorResponseDTO> handleNumberFormat(
+            NumberFormatException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponseDTO.buildError(
+                        HttpStatus.BAD_REQUEST,
+                        "Неверный формат цены",
+                        request));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
         Throwable cause = ex.getCause();
 
         if (cause instanceof InvalidFormatException ife && ife.getTargetType().isEnum()) {
             Class<?> enumClass = ife.getTargetType();
-            String fieldName = ife.getPathReference();
-
             String allowed = Arrays.stream(enumClass.getEnumConstants())
                     .map(Object::toString)
                     .collect(Collectors.joining(", "));
@@ -91,10 +123,18 @@ public class GlobalExceptionHandler {
                     + getFieldFromPath(ife)
                     + ". Возможные значения: " + allowed;
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponseDTO.buildError(
+                            HttpStatus.BAD_REQUEST,
+                            message,
+                            request));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ошибка в запросе: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponseDTO.buildError(
+                        HttpStatus.BAD_REQUEST,
+                        "Ошибка в запросе: " + ex.getMessage(),
+                        request));
     }
 
     private String getFieldFromPath(InvalidFormatException ife) {
@@ -104,11 +144,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleOther(Exception e) {
+    public ResponseEntity<ErrorResponseDTO> handleOther(Exception e, HttpServletRequest request) {
         e.printStackTrace();
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Что-то пошло не так: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponseDTO.buildError(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Что-то пошло не так: " + e.getMessage(),
+                        request));
     }
 
 }

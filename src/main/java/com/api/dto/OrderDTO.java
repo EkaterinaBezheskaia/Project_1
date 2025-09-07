@@ -1,5 +1,6 @@
 package com.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,14 +16,19 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDTO {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     int id;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     LocalDateTime creationDate;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    LocalDateTime updatedDate;
 
     @NotNull(message = "Статус обязательно: " +
             "NEW, PROCESSING, COMPLETED, CANCELED")
     Status status;
 
-    //TO DO: Необходимо, чтобы во время вызова GET на клиента выводился список с продуктами в заказах
     @Builder.Default
     List<ProductShortDTO> productsList = new ArrayList<>();
 

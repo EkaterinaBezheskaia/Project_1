@@ -23,9 +23,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -36,7 +36,6 @@ public class OrderService {
     private final ClientRepository clientRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
-    private final Set<Status> statusSet = EnumSet.allOf(Status.class);
 
     public OrderDTO createOrder(OrderDTO orderDTO) {
 
@@ -51,12 +50,10 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некоторые продукты не найдены");
         }
 
-//        Status status = orderDTO.getStatus();
-//        if (status == null || !statusSet.contains(status)) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
-//        }
-
-        Status status = Status.NEW;
+        Status status = orderDTO.getStatus();
+        if (status == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть");
+        }
 
         OrderEntity orderEntity = orderMapper.toOrderEntity(orderDTO, client, products);
         orderEntity.setCreationDate(LocalDateTime.now());
@@ -65,21 +62,45 @@ public class OrderService {
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 
-    public OrderDTO updateOrder(int id, Status status) {
-
+    public OrderDTO updateOrder(int id, OrderDTO orderDTO) {
         OrderEntity orderEntity = orderRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ не найден"));
 
-        if (status == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус обязателен");
-        }
-        if (!statusSet.contains(status)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть: " + Status.listAll());
+        List<Integer> productIds = orderDTO.getProductsList()
+                .stream().map(ProductShortDTO::getId).toList();
+
+        List<ProductEntity> products = productRepository.findAllById(productIds);
+
+        Set<Integer> foundIds = products.stream()
+                .map(ProductEntity::getId)
+                .collect(Collectors.toSet());
+
+        List<Integer> notFoundIds = productIds.stream()
+                .filter(pid -> !foundIds.contains(pid))
+                .toList();
+
+        if (!notFoundIds.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Не найдены продукты с id: " + notFoundIds
+            );
         }
 
+        Status status = orderDTO.getStatus();
+        if (status == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть");
+        }
+
+        orderEntity.setUpdatedDate(LocalDateTime.now());
         orderEntity.setStatus(status);
+        orderEntity.setProducts(products);
+
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
+    }
+
+    public OrderDTO getOrderById(int id) {
+        return orderMapper.toOrderDTO(orderRepository.findById(id).orElseThrow());
     }
 
     public Page<OrderDTO> getAllOrders(LocalDate creationDate, Status status, Pageable pageable) {
@@ -98,4 +119,5 @@ public class OrderService {
         }
         orderRepository.deleteById(id);
     }
+
 }

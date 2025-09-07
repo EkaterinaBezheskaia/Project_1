@@ -3,9 +3,12 @@ package com.store.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -26,6 +29,10 @@ public class OrderEntity {
     @CreationTimestamp
     private LocalDateTime creationDate;
 
+    @Column(name = "updatedDate", nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedDate;
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -37,7 +44,7 @@ public class OrderEntity {
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     @Builder.Default
-    private Set<ProductEntity> products = new HashSet<>();
+    private List<ProductEntity> products = new ArrayList<>();
 
 
     @ManyToOne(fetch = FetchType.LAZY)

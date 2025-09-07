@@ -34,7 +34,7 @@ public class EmployeeController {
     @PatchMapping("/{id}")
     public EmployeeDTO updateEmployee(
             @PathVariable("id") int id,
-            @RequestBody Map<String, String> employee) {
+            @RequestBody @Valid EmployeeDTO employee) {
         return employeeService.updateEmployee(id, employee);
     }
 

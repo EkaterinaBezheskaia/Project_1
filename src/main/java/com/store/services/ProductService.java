@@ -36,29 +36,13 @@ public class ProductService {
         return productMapper.toProductDTO(productRepository.save(productEntity));
     }
 
-    public ProductDTO updateProduct(int id, Map<String, String> updates) {
+    public ProductDTO updateProduct(int id, ProductDTO product) {
 
         ProductEntity productEntity = productRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Товар не найден"));
 
-        updates.forEach((key, value) -> {
-            if (key == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
-            if (value == null || value.trim().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Пустое значение для " + key);
-            value = value.trim();
-            switch (key) {
-                case "name" -> productEntity.setName(value);
-                case "description" -> productEntity.setDescription(value);
-                case "price" -> {
-                        BigDecimal price = new BigDecimal(value);
-                        productEntity.setPrice(price);
-                }
-                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле: " + key);
-            }
-        });
-        Optional<ProductEntity> sameProduct = productRepository.findByNameAndDescription(productEntity.getName(), productEntity.getDescription());
-        if (sameProduct.isPresent() && sameProduct.get().getId() != productEntity.getId()) {
+        if (productRepository.existsByNameAndDescription(product.getName(), product.getDescription())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Продукт с таким названием и описанием уже существует");
         }
 

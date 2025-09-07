@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import com.store.services.OrderService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -24,7 +23,6 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-//    TO DO: fix the creation status, when it is created, it must be NEW.
     @PostMapping
     public OrderDTO createOrder(
             @RequestBody @Valid OrderDTO order) {
@@ -34,8 +32,13 @@ public class OrderController {
     @PatchMapping("/{id}")
     public OrderDTO updateOrder(
             @PathVariable("id") int id,
-            @RequestBody Status status) {
-        return orderService.updateOrder(id, status);
+            @RequestBody @Valid OrderDTO order) {
+        return orderService.updateOrder(id, order);
+    }
+
+    @GetMapping("/{id}")
+    public OrderDTO getOrderById(@PathVariable("id") int id) {
+        return orderService.getOrderById(id);
     }
 
     @GetMapping

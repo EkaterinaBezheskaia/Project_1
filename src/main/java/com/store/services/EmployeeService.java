@@ -25,9 +25,6 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
-    private static final EmailValidator EMAIL_VALIDATOR_2 = EmailValidator.getInstance();
-    private static final Set<Position> ALLOWED_POSITIONS =
-            EnumSet.of(Position.ADMINISTRATOR, Position.MANAGER);
 
     public EmployeeDTO addEmployee(EmployeeDTO employee) {
 
@@ -39,51 +36,18 @@ public class EmployeeService {
         return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }
 
-    public EmployeeDTO updateEmployee(int id, Map<String, String> employee) {
+    public EmployeeDTO updateEmployee(int id, EmployeeDTO employee) {
 
         EmployeeEntity employeeEntity = employeeRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Работник не найден"));
 
-        employee.forEach((key, value) -> {
-            if (key == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ключ не может быть null");
-            if (value == null || value.trim().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Пустое значение для " + key);
-            switch (key) {
-                case "name" -> employeeEntity.setName(value.trim());
-                case "surname" -> employeeEntity.setSurname(value.trim());
-                case "email" -> {
-                    if(employeeRepository.existsByEmailAddress(value.trim()) &&
-                            !employeeEntity.getEmailAddress().equals(value.trim())) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
-                    }
-                    employeeEntity.setEmailAddress(value.trim());
-                }
-                case "password" -> employeeEntity.setPassword(value.trim());
-                case "position" -> {
-                    try {
-                        employeeEntity.setPosition(Position.valueOf(value.trim()));
-                    } catch (IllegalArgumentException ex) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректное значение должности");
-                    }
-                }
-                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неизвестное поле");
-            }
-        });
-
-        Optional<EmployeeEntity> sameEmployee = employeeRepository.findByNameAndSurnameAndPosition(
-                employeeEntity.getName(),
-                employeeEntity.getSurname(),
-                employeeEntity.getPosition()
-        );
-        if (sameEmployee.isPresent() && sameEmployee.get().getId() != id) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Сотрудник с таким именем и фамилией уже существует");
+        if(employeeRepository.existsByEmailAddress(employee.getEmailAddress())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже существует");
         }
 
         return employeeMapper.toEmployeeDTO(employeeRepository.save(employeeEntity));
     }
-
-
 
     @Transactional(readOnly = true)
     public EmployeeDTO getEmployeeById(int id) {

@@ -31,9 +31,9 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     public ProductDTO updateProduct(
-            @RequestBody Map<String, String> updates,
+            @RequestBody @Valid ProductDTO product,
             @PathVariable("id") int id) {
-        return productService.updateProduct(id, updates);
+        return productService.updateProduct(id, product);
     }
 
     @GetMapping
