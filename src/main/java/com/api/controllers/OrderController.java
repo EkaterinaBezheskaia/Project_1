@@ -32,8 +32,10 @@ public class OrderController {
     @PatchMapping("/{id}")
     public OrderDTO updateOrder(
             @PathVariable("id") int id,
-            @RequestBody @Valid OrderDTO order) {
-        return orderService.updateOrder(id, order);
+            @RequestParam(name = "add", required = false) List<Integer> addProductIds,
+            @RequestParam(name = "delete", required = false) List<Integer> deleteProductIds,
+            @RequestBody(required = false) @Valid OrderDTO order) {
+        return orderService.updateOrder(id, order, addProductIds, deleteProductIds);
     }
 
     @GetMapping("/{id}")

@@ -9,8 +9,6 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-//TO DO: Надо вынести логику обращения к БД в сервис!
-
 @Mapper(componentModel = "spring", uses = ProductShortMapper.class)
 public interface OrderMapper {
 

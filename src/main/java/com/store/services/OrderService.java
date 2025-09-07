@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,42 +63,61 @@ public class OrderService {
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
 
-    public OrderDTO updateOrder(int id, OrderDTO orderDTO) {
+    public OrderDTO updateOrder(
+            int id,
+            OrderDTO orderDTO,
+            List<Integer> addProductIds,
+            List<Integer> deleteProductIds
+    ) {
         OrderEntity orderEntity = orderRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ не найден"));
 
-        List<Integer> productIds = orderDTO.getProductsList()
-                .stream().map(ProductShortDTO::getId).toList();
+        List<ProductEntity> currentProducts = new ArrayList<>(orderEntity.getProducts());
 
-        List<ProductEntity> products = productRepository.findAllById(productIds);
+        if (orderDTO != null && orderDTO.getProductsList() != null) {
+            List<Integer> productIds = orderDTO.getProductsList().stream()
+                    .map(ProductShortDTO::getId)
+                    .toList();
 
-        Set<Integer> foundIds = products.stream()
-                .map(ProductEntity::getId)
-                .collect(Collectors.toSet());
+            List<ProductEntity> products = productRepository.findAllById(productIds);
 
-        List<Integer> notFoundIds = productIds.stream()
-                .filter(pid -> !foundIds.contains(pid))
-                .toList();
+            Set<Integer> foundIds = products.stream()
+                    .map(ProductEntity::getId)
+                    .collect(Collectors.toSet());
 
-        if (!notFoundIds.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Не найдены продукты с id: " + notFoundIds
-            );
+            List<Integer> notFoundIds = productIds.stream()
+                    .filter(pid -> !foundIds.contains(pid))
+                    .toList();
+
+            if (!notFoundIds.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Не найдены продукты с id: " + notFoundIds
+                );
+            }
+            currentProducts = new ArrayList<>(products);
         }
 
-        Status status = orderDTO.getStatus();
-        if (status == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус должен быть");
+        if (addProductIds != null && !addProductIds.isEmpty()) {
+            List<ProductEntity> addProducts = productRepository.findAllById(addProductIds);
+            currentProducts.addAll(addProducts);
         }
 
-        orderEntity.setUpdatedDate(LocalDateTime.now());
-        orderEntity.setStatus(status);
-        orderEntity.setProducts(products);
+        if (deleteProductIds != null && !deleteProductIds.isEmpty()) {
+            currentProducts.removeIf(p -> deleteProductIds.contains(p.getId()));
+        }
+
+        if (orderDTO != null && orderDTO.getStatus() != null) {
+            orderEntity.setStatus(orderDTO.getStatus());
+        }
+
+//        orderEntity.setUpdatedDate(LocalDateTime.now());
+        orderEntity.setProducts(currentProducts);
 
         return orderMapper.toOrderDTO(orderRepository.save(orderEntity));
     }
+
 
     public OrderDTO getOrderById(int id) {
         return orderMapper.toOrderDTO(orderRepository.findById(id).orElseThrow());
