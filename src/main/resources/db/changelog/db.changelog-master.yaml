@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-clients-table
+      author: Катерина
+      changes:
+        - sqlFile:
+            path: db/changelog/create_table_clients.sql
+
+  - changeSet:
+      id: create-products-table
+      author: Катерина
+      changes:
+        - sqlFile:
+            path: db/changelog/create_table_products.sql
+
+  - changeSet:
+      id: create-employees-table
+      author: Катерина
+      changes:
+        - sqlFile:
+            path: db/changelog/create_table_employees.sql
+
+  - changeSet:
+      id: create-orders-table
+      author: Катерина
+      changes:
+        - sqlFile:
+            path: db/changelog/create_table_orders.sql
+
+  - changeSet:
+      id: create-order-products-table
+      author: Катерина
+      changes:
+        - sqlFile:
+            path: db/changelog/create_table_order_products.sql
